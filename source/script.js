@@ -1,16 +1,16 @@
-
 let scene, camera, renderer, model, controls;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 let audioLoader, listener, sound;
 let audioFiles = [
-    'Audio/11_WIP_.mp3',
-    'Audio/86_WIP_.mp3',
-    'Audio/90 V1_WIP_.mp3',
-    'Audio/91_WIP_.mp3'
+    '../assets/audio/11_WIP_.mp3',
+    '../assets/audio/86_WIP_.mp3',
+    '../assets/audio/90 V1_WIP_.mp3',
+    '../assets/audio/91_WIP_.mp3'
 ];
 let currentAudioIndex = 0;
 let shaderMaterial;
+
 init();
 animate();
 
@@ -59,7 +59,7 @@ function init() {
 
     new THREE.RGBELoader()
         .setDataType(THREE.UnsignedByteType) // set data type
-        .load('little_paris_under_tower_1k.hdr', function(texture) {
+        .load('../assets/little_paris_under_tower_1k.hdr', function(texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             scene.environment = envMap; // Use the HDR for environment lighting only
             texture.dispose();
@@ -75,7 +75,7 @@ function init() {
 
     // Load model
     const loader = new THREE.GLTFLoader();
-    loader.load('Buttons/Buttons2.gltf', function(gltf) {
+    loader.load('../assets/model/Buttons2.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
@@ -131,6 +131,7 @@ function init() {
         }
     });
 }
+
 function setupModelControls() {
     if (!model) {
         console.error('Model is not loaded.');
