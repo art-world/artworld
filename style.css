@@ -55,7 +55,7 @@ body {
 /* Adding the font */
 @font-face {
     font-family: 'Segment7';
-    src: url('https://fonts.cdnfonts.com/s/48216/segment7.woff') format('woff');
+    src: url('https://static.cdnfonts.com/s/47748/segment7.woff') format('woff');
     font-weight: normal;
     font-style: normal;
 }
