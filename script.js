@@ -76,24 +76,42 @@ function init() {
             pmremGenerator.dispose();
         });
 
-    // Other initialization code (controls, model loading, etc.)
+    // Define shaderMaterial
+    shaderMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+            iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+            iTime: { value: 0.0 }
+        },
+        vertexShader: `your vertex shader code here`,
+        fragmentShader: `your fragment shader code here`
+    });
 
     // Event listeners
     window.addEventListener('resize', onWindowResize, false);
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
+// Define onDocumentMouseDown
+function onDocumentMouseDown(event) {
+    event.preventDefault();
+    console.log('Mouse down event detected.');
+}
+
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+    if (shaderMaterial && shaderMaterial.uniforms && shaderMaterial.uniforms.iResolution) {
+        shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+    }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-    shaderMaterial.uniforms.iTime.value += 0.05; // Update time uniform
+    if (shaderMaterial && shaderMaterial.uniforms && shaderMaterial.uniforms.iTime) {
+        shaderMaterial.uniforms.iTime.value += 0.05; // Update time uniform
+    }
     renderer.render(scene, camera);
 }
 
