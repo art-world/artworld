@@ -36,6 +36,16 @@ function init() {
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
+    // Controls setup
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.minDistance = 1;
+    controls.maxDistance = 1000;
+    controls.maxPolarAngle = Math.PI / 2;
+    console.log('Controls initialized.');
+
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 2); // Increase intensity of ambient light
     scene.add(ambientLight);
