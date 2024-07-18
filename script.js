@@ -20,7 +20,7 @@ function init() {
     console.log('Initializing scene...');
     // Scene setup
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a); // Set background to a lighter shade
+    scene.background = new THREE.Color(0x000000); // Set background to completely black
     console.log('Scene created.');
 
     // Camera setup
@@ -30,7 +30,7 @@ function init() {
 
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0x1a1a1a); // Set background to a lighter shade
+    renderer.setClearColor(0x000000); // Set background to completely black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
@@ -87,7 +87,7 @@ function init() {
         controls.update();
 
         const loadDuration = Date.now() - loadStartTime;
-        const minLoadTime = 5000; // Minimum 5 seconds
+        const minLoadTime = 10000; // Minimum 10 seconds
         const remainingTime = Math.max(minLoadTime - loadDuration, 0);
 
         setTimeout(() => {
@@ -99,7 +99,7 @@ function init() {
     }, function(xhr) {
         // Update loading percentage
         if (xhr.lengthComputable) {
-            const percentComplete = Math.round((xhr.loaded / xhr.total) * 100);
+            const percentComplete = Math.min(Math.round((xhr.loaded / xhr.total) * 100), 100);
             loadingPercentage.innerText = `${percentComplete}%`;
         }
     }, function (error) {
