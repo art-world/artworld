@@ -86,6 +86,28 @@ function init() {
             pmremGenerator.dispose();
         });
 
+    // Model loading
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+        './assets/model/Buttons2.gltf', 
+        function (gltf) {
+            model = gltf.scene;
+            scene.add(model);
+            console.log('Model loaded:', model);
+
+            // Hide the loading screen
+            loadingScreen.style.display = 'none';
+        },
+        function (xhr) {
+            const percentage = (xhr.loaded / xhr.total) * 100;
+            loadingPercentage.textContent = Math.round(percentage) + '%';
+            console.log('Model loading progress:', percentage + '%');
+        },
+        function (error) {
+            console.error('An error happened', error);
+        }
+    );
+
     // Define shaderMaterial
     shaderMaterial = new THREE.ShaderMaterial({
         uniforms: {
@@ -97,8 +119,8 @@ function init() {
     });
 
     // Event listeners
-    window.addEventListener('resize', onWindowResize, false);
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
+    window.addEventListener('resize', onWindowResize);
+    window.addEventListener('mousedown', onDocumentMouseDown);
 }
 
 // Define onDocumentMouseDown
