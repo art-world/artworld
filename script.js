@@ -1,6 +1,7 @@
 let scene, camera, renderer, model, controls;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
+const loadingPercentage = document.getElementById('loadingPercentage');
 let audioLoader, listener, sound;
 let audioFiles = [
     './assets/audio/11_WIP_.mp3',
@@ -73,7 +74,7 @@ function init() {
     controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
 
-    // Load model
+    // Load model with progress tracking
     const loader = new THREE.GLTFLoader();
     loader.load('./assets/model/Buttons2.gltf', function(gltf) {
         console.log('Model loaded successfully.');
@@ -87,7 +88,13 @@ function init() {
         setupModelControls();
         loadingScreen.style.display = 'none';
         container.style.display = 'block';
-    }, undefined, function (error) {
+    }, function(xhr) {
+        // Update loading percentage
+        if (xhr.lengthComputable) {
+            const percentComplete = Math.round((xhr.loaded / xhr.total) * 100);
+            loadingPercentage.innerText = `${percentComplete}%`;
+        }
+    }, function (error) {
         console.error('Error loading model:', error);
     });
 
