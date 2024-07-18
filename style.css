@@ -22,41 +22,41 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 48px; /* Scale up the font */
     font-family: 'Segment7', sans-serif;
     color: #FFFFFF; /* White text */
     text-shadow: 
+        0 0 1px #FFFFFF, 
         0 0 2px #FFFFFF, 
-        0 0 4px #FFFFFF, 
-        0 0 6px #FFFFFF,
-        0 0 8px #FFFFFF;
-    filter: blur(0.3px);
-    font-weight: 100; /* Thinner lines */
+        0 0 3px #FFFFFF,
+        0 0 4px #FFFFFF;
+    filter: blur(0.1px); /* Reduced blur */
+    font-weight: 50; /* Twice as thin */
 }
 
 #loadingScreen span {
     color: #FFFFFF; /* White text */
     text-shadow: 
+        0 0 1px #FFFFFF, 
         0 0 2px #FFFFFF, 
-        0 0 4px #FFFFFF, 
-        0 0 6px #FFFFFF,
-        0 0 8px #FFFFFF;
-    filter: blur(0.3px);
-    font-weight: 100; /* Thinner lines */
+        0 0 3px #FFFFFF,
+        0 0 4px #FFFFFF;
+    filter: blur(0.1px); /* Reduced blur */
+    font-weight: 50; /* Twice as thin */
 }
 
 /* Percentage counter */
 #loadingPercentage {
     margin-top: 20px;
-    font-size: 32px;
+    font-size: 64px; /* Scale up the font */
     color: #FFFFFF; /* White text */
     text-shadow: 
+        0 0 1px #FFFFFF, 
         0 0 2px #FFFFFF, 
-        0 0 4px #FFFFFF, 
-        0 0 6px #FFFFFF,
-        0 0 8px #FFFFFF;
-    filter: blur(0.3px);
-    font-weight: 100; /* Thinner lines */
+        0 0 3px #FFFFFF,
+        0 0 4px #FFFFFF;
+    filter: blur(0.1px); /* Reduced blur */
+    font-weight: 50; /* Twice as thin */
 }
 
 /* Adding the font */
