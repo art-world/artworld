@@ -11,6 +11,7 @@ let audioFiles = [
 ];
 let currentAudioIndex = 0;
 let shaderMaterial;
+let loadStartTime = Date.now();
 
 init();
 animate();
@@ -85,9 +86,16 @@ function init() {
         controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
         controls.update();
 
+        const loadDuration = Date.now() - loadStartTime;
+        const minLoadTime = 5000; // Minimum 5 seconds
+        const remainingTime = Math.max(minLoadTime - loadDuration, 0);
+
+        setTimeout(() => {
+            loadingScreen.style.display = 'none';
+            container.style.display = 'block';
+        }, remainingTime);
+
         setupModelControls();
-        loadingScreen.style.display = 'none';
-        container.style.display = 'block';
     }, function(xhr) {
         // Update loading percentage
         if (xhr.lengthComputable) {
