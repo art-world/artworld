@@ -1,6 +1,6 @@
 body {
     margin: 0;
-    background-color: #000;
+    background-color: #000; /* Fully black background */
     color: #fff;
     font-family: Arial, sans-serif;
 }
@@ -31,7 +31,7 @@ body {
         0 0 3px #FFFFFF,
         0 0 4px #FFFFFF;
     filter: blur(0.1px); /* Reduced blur */
-    font-weight: 50; /* Twice as thin */
+    font-weight: 5; /* Thinner lines */
 }
 
 #loadingScreen span {
@@ -42,7 +42,7 @@ body {
         0 0 3px #FFFFFF,
         0 0 4px #FFFFFF;
     filter: blur(0.1px); /* Reduced blur */
-    font-weight: 50; /* Twice as thin */
+    font-weight: 5; /* Thinner lines */
 }
 
 /* Percentage counter */
@@ -56,7 +56,7 @@ body {
         0 0 3px #FFFFFF,
         0 0 4px #FFFFFF;
     filter: blur(0.1px); /* Reduced blur */
-    font-weight: 50; /* Twice as thin */
+    font-weight: 5; /* Thinner lines */
 }
 
 /* Adding the font */
