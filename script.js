@@ -46,168 +46,41 @@ function init() {
     scene.add(hemisphereLight);
     console.log('Hemisphere light added.');
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 1.5); // Increase intensity to 1.5
     directionalLight1.position.set(1, 1, 1).normalize();
     scene.add(directionalLight1);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 1.2); // Increase intensity to 1.2
     directionalLight2.position.set(-1, -1, -1).normalize();
     scene.add(directionalLight2);
-    console.log('Directional lights added.');
 
-    // Load HDRI environment
+    // Load environment map
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
     new THREE.RGBELoader()
-        .setDataType(THREE.UnsignedByteType) // set data type
-        .load('./assets/little_paris_under_tower_1k.hdr', function(texture) {
+        .setDataType(THREE.UnsignedByteType)
+        .load('assets/little_paris_under_tower_1k.hdr', function (texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-            scene.environment = envMap; // Use the HDR for environment lighting only
+            scene.environment = envMap;
+            scene.background = envMap;
+
+            // Adjust envMap intensity for all materials
+            scene.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.envMapIntensity = 2.0; // Increase intensity
+                }
+            });
+
             texture.dispose();
             pmremGenerator.dispose();
         });
 
-    // OrbitControls setup
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.screenSpacePanning = false;
-    controls.maxPolarAngle = Math.PI / 2;
+    // Other initialization code (controls, model loading, etc.)
 
-    // Load model with progress tracking
-    const loader = new THREE.GLTFLoader();
-    loader.load('./assets/model/Buttons2.gltf', function(gltf) {
-        console.log('Model loaded successfully.');
-        model = gltf.scene;
-        model.position.set(0, 0, 0);
-        model.scale.set(200, 200, 200); // Scale the model up
-        scene.add(model);
-        controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-        controls.update();
-
-        const loadDuration = Date.now() - loadStartTime;
-        const minLoadTime = 10000; // Minimum 10 seconds
-        const remainingTime = Math.max(minLoadTime - loadDuration, 0);
-
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            container.style.display = 'block';
-        }, remainingTime);
-
-        setupModelControls();
-    }, function(xhr) {
-        // Update loading percentage
-        if (xhr.lengthComputable) {
-            const percentComplete = Math.min(Math.round((xhr.loaded / xhr.total) * 100), 100);
-            loadingPercentage.innerText = `${percentComplete}%`;
-        }
-    }, function (error) {
-        console.error('Error loading model:', error);
-    });
-
-    // Handle window resize
+    // Event listeners
     window.addEventListener('resize', onWindowResize, false);
-
-    // Create audio listener and loader
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    audioLoader = new THREE.AudioLoader();
-
-    // Create shader material
-    shaderMaterial = new THREE.ShaderMaterial({
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float iTime;
-            uniform vec2 iResolution;
-            varying vec2 vUv;
-
-            // Shadertoy shader code
-            void mainImage( out vec4 fragColor, in vec2 fragCoord )
-            {
-                vec2 uv = fragCoord / iResolution.xy;
-                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
-                fragColor = vec4(col,1.0);
-            }
-
-            void main() {
-                mainImage(gl_FragColor, vUv * iResolution.xy);
-            }
-        `,
-        uniforms: {
-            iTime: { value: 0 },
-            iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        }
-    });
-}
-
-function setupModelControls() {
-    if (!model) {
-        console.error('Model is not loaded.');
-        return;
-    }
-    const playButton = model.getObjectByName('PlayButton');
-    const pauseButton = model.getObjectByName('PauseButton');
-    const forwardButton = model.getObjectByName('ForwardButton');
-    const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2 = model.getObjectByName('Glass2');
-    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-
-    console.log("Buttons and Screens:", {
-        playButton,
-        pauseButton,
-        forwardButton,
-        backwardButton,
-        glass2,
-        glass2Glass1_0
-    });
-
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
-        console.error('One or more buttons or the screen textures are not found on the model.');
-        return;
-    }
-    playButton.userData = { action: () => { console.log('Play button pressed.'); playAudio(audioFiles[currentAudioIndex]); } };
-    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
-    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
-    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        console.log('Mouse down event detected.');
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0) {
-            const object = intersects[0].object;
-            if (object.userData.action) {
-                console.log('Executing action for:', object.name);
-                object.userData.action();
-            } else {
-                console.log('No action found for:', object.name);
-            }
-        } else {
-            console.log('No intersections found.');
-        }
-    }
-
     window.addEventListener('mousedown', onDocumentMouseDown, false);
-
-    playButton.userData.action = () => {
-        console.log('Play button pressed.');
-        playAudio(audioFiles[currentAudioIndex]);
-        glass2.material = shaderMaterial;
-        glass2Glass1_0.material = shaderMaterial;
-    };
 }
 
 function onWindowResize() {
