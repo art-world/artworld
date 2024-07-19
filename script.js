@@ -48,7 +48,7 @@ function init() {
 
     new THREE.RGBELoader()
         .setDataType(THREE.UnsignedByteType)
-        .load('https://artworldtheory.github.io/Art-World/assets/little_paris_under_tower_1k.hdr', function (texture) {
+        .load('assets/little_paris_under_tower_1k.hdr', function (texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             scene.environment = envMap;
             scene.background = envMap;
@@ -60,7 +60,7 @@ function init() {
     // Load model
     const loader = new THREE.GLTFLoader();
     loader.load(
-        'https://artworldtheory.github.io/Art-World/assets/model/Buttons2.gltf', 
+        'assets/model/Buttons2.gltf', 
         function (gltf) {
             const model = gltf.scene;
             scene.add(model);
