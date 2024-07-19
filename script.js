@@ -16,6 +16,8 @@ let audioFiles = [
 ];
 let currentAudioIndex = 0;
 let shaderMaterial;
+let userInteracting = false;
+let interactionTimeout;
 
 init();
 animate();
@@ -46,16 +48,16 @@ function init() {
     scene.add(ambientLight);
     console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
     console.log('Hemisphere light added.');
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
     directionalLight1.position.set(1, 1, 1).normalize();
     scene.add(directionalLight1);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
     directionalLight2.position.set(-1, -1, -1).normalize();
     scene.add(directionalLight2);
     console.log('Directional lights added.');
@@ -80,6 +82,14 @@ function init() {
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
+    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+
+    // Add event listeners to manage auto-rotate
+    window.addEventListener('mousedown', onUserInteraction, false);
+    window.addEventListener('mousemove', onUserInteraction, false);
+    window.addEventListener('mouseup', onUserInteraction, false);
+    window.addEventListener('wheel', onUserInteraction, false);
 
     // Load model
     const loader = new THREE.GLTFLoader();
@@ -93,6 +103,13 @@ function init() {
             scene.add(model);
             controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
             controls.update();
+
+            // Increase the envMapIntensity for all materials in the model
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.envMapIntensity = 2; // Increase the intensity
+                }
+            });
 
             setupModelControls();
             loadingScreen.style.display = 'none';
@@ -208,6 +225,16 @@ function setupModelControls() {
         glass2.material = shaderMaterial;
         glass2Glass1_0.material = shaderMaterial;
     };
+}
+
+function onUserInteraction() {
+    userInteracting = true;
+    controls.autoRotate = false;
+    clearTimeout(interactionTimeout);
+    interactionTimeout = setTimeout(() => {
+        userInteracting = false;
+        controls.autoRotate = true;
+    }, 5000); // Re-enable auto-rotate after 5 seconds of inactivity
 }
 
 function onWindowResize() {
