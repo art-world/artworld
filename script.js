@@ -1,6 +1,7 @@
 let scene, camera, renderer, model, controls;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
+const loadingPercentage = document.getElementById('loadingPercentage');
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
@@ -18,7 +19,7 @@ function init() {
     console.log('Initializing scene...');
     // Scene setup
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x1a1a1a); // Set background to a lighter shade
+    scene.background = new THREE.Color(0x000000); // Set background to black
     console.log('Scene created.');
 
     // Camera setup
@@ -28,7 +29,7 @@ function init() {
 
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0x1a1a1a); // Set background to a lighter shade
+    renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     container.appendChild(renderer.domElement);
