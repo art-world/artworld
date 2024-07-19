@@ -15,8 +15,8 @@ let audioFiles = [
     'assets/audio/91_WIP_.mp3'
 ];
 let currentAudioIndex = 0;
-let shaderMaterial;
 let userInteracting = false;
+let video, videoTexture;
 
 init();
 animate();
@@ -132,35 +132,28 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create shader material
-    shaderMaterial = new THREE.ShaderMaterial({
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float iTime;
-            uniform vec2 iResolution;
-            varying vec2 vUv;
+    // Create and add video texture
+    createVideoTexture();
+}
 
-            void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-                vec2 uv = fragCoord / iResolution.xy;
-                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4));
-                fragColor = vec4(col, 1.0);
-            }
+function createVideoTexture() {
+    video = document.createElement('video');
+    video.src = 'assets/videos/Body Scan 2.mp4'; // Path to your video file
+    video.load();
+    video.play();
+    video.loop = true;
 
-            void main() {
-                mainImage(gl_FragColor, vUv * iResolution.xy);
-            }
-        `,
-        uniforms: {
-            iTime: { value: 0 },
-            iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        }
-    });
+    videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBFormat;
+
+    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+    const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
+    const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+    videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
+
+    scene.add(videoMesh);
 }
 
 function setupModelControls() {
@@ -191,8 +184,8 @@ function setupModelControls() {
     playButton.userData = { action: () => { 
         console.log('Play button pressed.'); 
         playAudio(audioFiles[currentAudioIndex]); 
-        glass2.material = shaderMaterial;
-        glass2Glass1_0.material = shaderMaterial;
+        glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
     }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
@@ -238,13 +231,16 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+
+    // Adjust video plane size
+    if (videoMesh) {
+        videoMesh.scale.set(window.innerWidth, window.innerHeight, 1);
+    }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-    shaderMaterial.uniforms.iTime.value += 0.05; // Update time uniform
     renderer.render(scene, camera);
 }
 
