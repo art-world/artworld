@@ -65,6 +65,7 @@ function init() {
             scene.environment = envMap; // Use the HDR for environment lighting only
             texture.dispose();
             pmremGenerator.dispose();
+            console.log('Environment map loaded.');
         });
 
     // OrbitControls setup
@@ -76,21 +77,30 @@ function init() {
 
     // Load model
     const loader = new THREE.GLTFLoader();
-    loader.load('assets/model/Buttons2.gltf', function(gltf) {
-        console.log('Model loaded successfully.');
-        model = gltf.scene;
-        model.position.set(0, 0, 0);
-        model.scale.set(200, 200, 200); // Scale the model up
-        scene.add(model);
-        controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-        controls.update();
+    loader.load(
+        'assets/model/Buttons2.gltf',
+        function(gltf) {
+            console.log('Model loaded successfully.');
+            model = gltf.scene;
+            model.position.set(0, 0, 0);
+            model.scale.set(200, 200, 200); // Scale the model up
+            scene.add(model);
+            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+            controls.update();
 
-        setupModelControls();
-        loadingScreen.style.display = 'none';
-        container.style.display = 'block';
-    }, undefined, function (error) {
-        console.error('Error loading model:', error);
-    });
+            setupModelControls();
+            loadingScreen.style.display = 'none';
+            container.style.display = 'block';
+        },
+        function(xhr) {
+            // Calculate and display percentage
+            const percentComplete = (xhr.loaded / xhr.total) * 100;
+            loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
+        },
+        function (error) {
+            console.error('Error loading model:', error);
+        }
+    );
 
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
@@ -114,12 +124,10 @@ function init() {
             uniform vec2 iResolution;
             varying vec2 vUv;
 
-            // Shadertoy shader code
-            void mainImage( out vec4 fragColor, in vec2 fragCoord )
-            {
+            void mainImage(out vec4 fragColor, in vec2 fragCoord) {
                 vec2 uv = fragCoord / iResolution.xy;
-                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0,2,4));
-                fragColor = vec4(col,1.0);
+                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4));
+                fragColor = vec4(col, 1.0);
             }
 
             void main() {
