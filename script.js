@@ -1,4 +1,4 @@
-let scene, camera, renderer, model, controls;
+let scene, camera, renderer, model, controls, videoMesh;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -138,7 +138,7 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/videos/Body Scan 2.mp4'; // Path to your video file
+    video.src = 'Body Scan 2.mp4'; // Path to your video file
     video.load();
     video.play();
     video.loop = true;
@@ -150,7 +150,7 @@ function createVideoTexture() {
 
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
-    const videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+    videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
     videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
 
     scene.add(videoMesh);
