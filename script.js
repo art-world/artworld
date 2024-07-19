@@ -1,7 +1,12 @@
 let scene, camera, renderer, model, controls;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
-const loadingPercentage = document.getElementById('loadingPercentage');
+const loadingText = document.createElement('div');
+loadingText.innerText = 'Use the walkman buttons to play audio...';
+loadingText.style.textAlign = 'center';
+loadingScreen.appendChild(loadingText);
+const loadingPercentage = document.createElement('div');
+loadingScreen.appendChild(loadingPercentage);
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
@@ -94,7 +99,7 @@ function init() {
         },
         function(xhr) {
             // Calculate and display percentage
-            const percentComplete = (xhr.loaded / xhr.total) * 100;
+            const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
             loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
         },
         function (error) {
