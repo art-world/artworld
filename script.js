@@ -85,10 +85,10 @@ function init() {
     controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
     // Add event listeners to manage auto-rotate
-    window.addEventListener('mousedown', onUserInteractionStart, false);
-    window.addEventListener('mousemove', onUserInteractionStart, false);
-    window.addEventListener('mouseup', onUserInteractionEnd, false);
-    window.addEventListener('wheel', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
+    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
     // Load model
     const loader = new THREE.GLTFLoader();
@@ -188,7 +188,12 @@ function setupModelControls() {
         console.error('One or more buttons or the screen textures are not found on the model.');
         return;
     }
-    playButton.userData = { action: () => { console.log('Play button pressed.'); playAudio(audioFiles[currentAudioIndex]); } };
+    playButton.userData = { action: () => { 
+        console.log('Play button pressed.'); 
+        playAudio(audioFiles[currentAudioIndex]); 
+        glass2.material = shaderMaterial;
+        glass2Glass1_0.material = shaderMaterial;
+    }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
     backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
@@ -217,20 +222,15 @@ function setupModelControls() {
     }
 
     window.addEventListener('mousedown', onDocumentMouseDown, false);
-
-    playButton.userData.action = () => {
-        console.log('Play button pressed.');
-        playAudio(audioFiles[currentAudioIndex]);
-        glass2.material = shaderMaterial;
-        glass2Glass1_0.material = shaderMaterial;
-    };
 }
 
 function onUserInteractionStart() {
+    userInteracting = true;
     controls.autoRotate = false;
 }
 
 function onUserInteractionEnd() {
+    userInteracting = false;
     controls.autoRotate = true;
 }
 
