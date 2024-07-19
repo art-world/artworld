@@ -1,68 +1,27 @@
-body {
-    margin: 0;
-    background-color: #000; /* Fully black background */
-    color: #fff;
-    font-family: Arial, sans-serif;
-}
-
-#container {
-    width: 100%;
-    height: 100vh;
-    display: none;
-}
-
 #loadingScreen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: #000;
+    background: rgba(0, 0, 0, 0.8);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 48px; /* Scale up the font */
-    font-family: 'Segment7', sans-serif;
-    color: #FFFFFF; /* White text */
-    text-shadow: 
-        0 0 1px #FFFFFF, 
-        0 0 2px #FFFFFF, 
-        0 0 3px #FFFFFF,
-        0 0 4px #FFFFFF;
-    filter: blur(0.1px); /* Reduced blur */
-    font-weight: 5; /* Thinner lines */
+    color: white;
+    font-size: 2em;
+    z-index: 9999;
 }
 
-#loadingScreen span {
-    color: #FFFFFF; /* White text */
-    text-shadow: 
-        0 0 1px #FFFFFF, 
-        0 0 2px #FFFFFF, 
-        0 0 3px #FFFFFF,
-        0 0 4px #FFFFFF;
-    filter: blur(0.1px); /* Reduced blur */
-    font-weight: 5; /* Thinner lines */
+#container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    left: 0;
 }
 
-/* Percentage counter */
-#loadingPercentage {
-    margin-top: 20px;
-    font-size: 64px; /* Scale up the font */
-    color: #FFFFFF; /* White text */
-    text-shadow: 
-        0 0 1px #FFFFFF, 
-        0 0 2px #FFFFFF, 
-        0 0 3px #FFFFFF,
-        0 0 4px #FFFFFF;
-    filter: blur(0.1px); /* Reduced blur */
-    font-weight: 5; /* Thinner lines */
-}
-
-/* Adding the font */
-@font-face {
-    font-family: 'Segment7';
-    src: url('./assets/fonts/G7_Segment_7a.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
+.hidden {
+    display: none;
 }
