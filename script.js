@@ -8,7 +8,7 @@ animate();
 
 function init() {
     console.log('Initializing scene...');
-    
+
     // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
@@ -29,13 +29,10 @@ function init() {
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
-    controls.screenSpacePanning = false;
-    controls.minDistance = 1;
-    controls.maxDistance = 500;
-    controls.maxPolarAngle = Math.PI / 2;
+    controls.enableZoom = true;
     console.log('Controls initialized.');
 
-    // Lighting setup
+    // Lights setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 2);
     scene.add(ambientLight);
     console.log('Ambient light added.');
@@ -57,6 +54,7 @@ function init() {
             scene.background = envMap;
             texture.dispose();
             pmremGenerator.dispose();
+            console.log('Environment map loaded.');
         });
 
     // Load model
