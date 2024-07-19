@@ -17,7 +17,6 @@ let audioFiles = [
 let currentAudioIndex = 0;
 let shaderMaterial;
 let userInteracting = false;
-let interactionTimeout;
 
 init();
 animate();
@@ -86,10 +85,10 @@ function init() {
     controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
     // Add event listeners to manage auto-rotate
-    window.addEventListener('mousedown', onUserInteraction, false);
-    window.addEventListener('mousemove', onUserInteraction, false);
-    window.addEventListener('mouseup', onUserInteraction, false);
-    window.addEventListener('wheel', onUserInteraction, false);
+    window.addEventListener('mousedown', onUserInteractionStart, false);
+    window.addEventListener('mousemove', onUserInteractionStart, false);
+    window.addEventListener('mouseup', onUserInteractionEnd, false);
+    window.addEventListener('wheel', onUserInteractionStart, false);
 
     // Load model
     const loader = new THREE.GLTFLoader();
@@ -227,14 +226,12 @@ function setupModelControls() {
     };
 }
 
-function onUserInteraction() {
-    userInteracting = true;
+function onUserInteractionStart() {
     controls.autoRotate = false;
-    clearTimeout(interactionTimeout);
-    interactionTimeout = setTimeout(() => {
-        userInteracting = false;
-        controls.autoRotate = true;
-    }, 5000); // Re-enable auto-rotate after 5 seconds of inactivity
+}
+
+function onUserInteractionEnd() {
+    controls.autoRotate = true;
 }
 
 function onWindowResize() {
