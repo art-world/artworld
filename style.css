@@ -1,16 +1,28 @@
+@font-face {
+    font-family: 'G7Segment';
+    src: url('assets/fonts/G7_Segment_7a.ttf') format('truetype');
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: 'G7Segment', sans-serif;
+}
+
 #loadingScreen {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 2em;
     z-index: 9999;
+    font-family: 'G7Segment', sans-serif;
 }
 
 #container {
@@ -20,8 +32,4 @@
     position: absolute;
     top: 0;
     left: 0;
-}
-
-.hidden {
-    display: none;
 }
