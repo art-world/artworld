@@ -1,4 +1,4 @@
-let scene, camera, renderer, model, controls, videoMesh;
+let scene, camera, renderer, model, controls, videoMesh, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -16,7 +16,7 @@ let audioFiles = [
 ];
 let currentAudioIndex = 0;
 let userInteracting = false;
-let video, videoTexture;
+let video;
 
 init();
 animate();
@@ -193,8 +193,12 @@ function setupModelControls() {
     playButton.userData = { action: () => { 
         console.log('Play button pressed.'); 
         playAudio(audioFiles[currentAudioIndex]); 
-        glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-        glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        if (videoTexture) {
+            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        } else {
+            console.error('Video texture is not available.');
+        }
     }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
