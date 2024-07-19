@@ -139,21 +139,30 @@ function init() {
 function createVideoTexture() {
     video = document.createElement('video');
     video.src = 'Body Scan 2.mp4'; // Path to your video file
+    video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
-    video.play();
-    video.loop = true;
 
-    videoTexture = new THREE.VideoTexture(video);
-    videoTexture.minFilter = THREE.LinearFilter;
-    videoTexture.magFilter = THREE.LinearFilter;
-    videoTexture.format = THREE.RGBFormat;
+    video.addEventListener('loadeddata', () => {
+        console.log('Video loaded successfully');
+        video.play();
+        video.loop = true;
 
-    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
-    const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
-    videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
-    videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
+        videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
 
-    scene.add(videoMesh);
+        const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
+        videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+        videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
+
+        scene.add(videoMesh);
+    });
+
+    video.addEventListener('error', (e) => {
+        console.error('Error loading video:', e);
+    });
 }
 
 function setupModelControls() {
