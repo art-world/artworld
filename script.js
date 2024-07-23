@@ -1,4 +1,4 @@
-let scene, camera, renderer, model, controls;
+let scene, camera, renderer, model, controls, videoMesh, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -15,8 +15,8 @@ let audioFiles = [
     'assets/audio/91_WIP_.mp3'
 ];
 let currentAudioIndex = 0;
-let shaderMaterial;
 let userInteracting = false;
+let video;
 
 init();
 animate();
@@ -85,10 +85,10 @@ function init() {
     controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
     // Add event listeners to manage auto-rotate
-    window.addEventListener('mousedown', onUserInteractionStart, false);
-    window.addEventListener('mousemove', onUserInteractionStart, false);
-    window.addEventListener('mouseup', onUserInteractionEnd, false);
-    window.addEventListener('wheel', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
+    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
     // Load model
     const loader = new THREE.GLTFLoader();
@@ -132,36 +132,47 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create shader material
-    shaderMaterial = new THREE.ShaderMaterial({
-        vertexShader: `
-            varying vec2 vUv;
-            void main() {
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        `,
-        fragmentShader: `
-            uniform float iTime;
-            uniform vec2 iResolution;
-            varying vec2 vUv;
+    // Create and add video texture
+    createVideoTexture();
+}
 
-            void mainImage(out vec4 fragColor, in vec2 fragCoord) {
-                vec2 uv = fragCoord / iResolution.xy;
-                vec3 col = 0.5 + 0.5 * cos(iTime + uv.xyx + vec3(0, 2, 4));
-                fragColor = vec4(col, 1.0);
-            }
+function createVideoTexture() {
+    video = document.createElement('video');
+    video.src = 'Body Scan 2.mp4'; // Ensure this path is correct for local testing
+    video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
+    video.load();
 
-            void main() {
-                mainImage(gl_FragColor, vUv * iResolution.xy);
-            }
-        `,
-        uniforms: {
-            iTime: { value: 0 },
-            iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
-        }
+    video.addEventListener('loadeddata', () => {
+        console.log('Video loaded successfully');
+        video.play();
+        video.loop = true;
+
+        videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
+
+        const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+        const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
+        videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
+        videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
+
+        scene.add(videoMesh);
+    });
+
+    video.addEventListener('error', (e) => {
+        console.error('Error loading video:', e);
+        console.error(`Video Error: src: ${video.src}, error code: ${video.error ? video.error.code : 'unknown'}`);
     });
 }
+
+
+    video.addEventListener('error', (e) => {
+        console.error('Error loading video:', e);
+        console.error(`Video Error: src: ${video.src}, error code: ${video.error ? video.error.code : 'unknown'}`);
+    });
+}
+
 
 function setupModelControls() {
     if (!model) {
@@ -188,7 +199,16 @@ function setupModelControls() {
         console.error('One or more buttons or the screen textures are not found on the model.');
         return;
     }
-    playButton.userData = { action: () => { console.log('Play button pressed.'); playAudio(audioFiles[currentAudioIndex]); } };
+    playButton.userData = { action: () => { 
+        console.log('Play button pressed.'); 
+        playAudio(audioFiles[currentAudioIndex]); 
+        if (videoTexture) {
+            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        } else {
+            console.error('Video texture is not available.');
+        }
+    }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
     backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
@@ -217,20 +237,15 @@ function setupModelControls() {
     }
 
     window.addEventListener('mousedown', onDocumentMouseDown, false);
-
-    playButton.userData.action = () => {
-        console.log('Play button pressed.');
-        playAudio(audioFiles[currentAudioIndex]);
-        glass2.material = shaderMaterial;
-        glass2Glass1_0.material = shaderMaterial;
-    };
 }
 
 function onUserInteractionStart() {
+    userInteracting = true;
     controls.autoRotate = false;
 }
 
 function onUserInteractionEnd() {
+    userInteracting = false;
     controls.autoRotate = true;
 }
 
@@ -238,13 +253,16 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+
+    // Adjust video plane size
+    if (videoMesh) {
+        videoMesh.scale.set(window.innerWidth, window.innerHeight, 1);
+    }
 }
 
 function animate() {
     requestAnimationFrame(animate);
     controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-    shaderMaterial.uniforms.iTime.value += 0.05; // Update time uniform
     renderer.render(scene, camera);
 }
 
