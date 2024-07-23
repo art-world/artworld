@@ -1,4 +1,4 @@
-let scene, camera, renderer, model, controls, videoMesh, videoTexture;
+let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -151,13 +151,6 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
-
-        const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
-        const videoGeometry = new THREE.PlaneGeometry(window.innerWidth, window.innerHeight);
-        videoMesh = new THREE.Mesh(videoGeometry, videoMaterial);
-        videoMesh.position.set(0, 0, -10); // Position the plane slightly behind the camera
-
-        scene.add(videoMesh);
     });
 
     video.addEventListener('error', (e) => {
@@ -196,6 +189,11 @@ function setupModelControls() {
         if (videoTexture) {
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            // Scale and adjust the video texture to fit the areas on the model
+            glass2.material.map.repeat.set(1, 1); // Adjust repeat to fit the area
+            glass2Glass1_0.material.map.repeat.set(1, 1); // Adjust repeat to fit the area
+            glass2.material.map.offset.set(0, 0); // Adjust offset if necessary
+            glass2Glass1_0.material.map.offset.set(0, 0); // Adjust offset if necessary
         } else {
             console.error('Video texture is not available.');
         }
@@ -244,11 +242,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-
-    // Adjust video plane size
-    if (videoMesh) {
-        videoMesh.scale.set(window.innerWidth, window.innerHeight, 1);
-    }
 }
 
 function animate() {
