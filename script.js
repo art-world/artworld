@@ -189,11 +189,10 @@ function setupModelControls() {
         if (videoTexture) {
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            // Scale and adjust the video texture to fit the areas on the model
-            glass2.material.map.repeat.set(1, 1); // Adjust repeat to fit the area
-            glass2Glass1_0.material.map.repeat.set(1, 1); // Adjust repeat to fit the area
-            glass2.material.map.offset.set(0, 0); // Adjust offset if necessary
-            glass2Glass1_0.material.map.offset.set(0, 0); // Adjust offset if necessary
+
+            // Automatically scale and align the video texture to fit the areas on the model
+            fitTextureToArea(glass2.material.map, glass2.scale.x, glass2.scale.y);
+            fitTextureToArea(glass2Glass1_0.material.map, glass2Glass1_0.scale.x, glass2Glass1_0.scale.y);
         } else {
             console.error('Video texture is not available.');
         }
@@ -227,6 +226,7 @@ function setupModelControls() {
 
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
+
 
 function onUserInteractionStart() {
     userInteracting = true;
