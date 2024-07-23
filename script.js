@@ -138,7 +138,7 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'Body Scan 2.mp4'; // Path to your video file
+    video.src = 'Body Scan 2.mp4'; // Ensure this path is correct for local testing
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
 
@@ -159,6 +159,13 @@ function createVideoTexture() {
 
         scene.add(videoMesh);
     });
+
+    video.addEventListener('error', (e) => {
+        console.error('Error loading video:', e);
+        console.error(`Video Error: src: ${video.src}, error code: ${video.error ? video.error.code : 'unknown'}`);
+    });
+}
+
 
     video.addEventListener('error', (e) => {
         console.error('Error loading video:', e);
