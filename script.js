@@ -162,8 +162,10 @@ function createVideoTexture() {
 
     video.addEventListener('error', (e) => {
         console.error('Error loading video:', e);
+        console.error(`Video Error: src: ${video.src}, error code: ${video.error ? video.error.code : 'unknown'}`);
     });
 }
+
 
 function setupModelControls() {
     if (!model) {
