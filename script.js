@@ -234,12 +234,23 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
-    // Reduce the scale to 50%
-    mesh.scale.set(mesh.scale.x * 0.5, mesh.scale.y * 0.5, mesh.scale.z);
+    if (!mesh.geometry.boundingBox) {
+        mesh.geometry.computeBoundingBox();
+    }
+
+    // Scale the video texture down to 50%
+    const scaleX = 0.5;
+    const scaleY = 0.5;
+
+    // Adjust UV mapping to maintain aspect ratio
+    mesh.material.map.repeat.set(scaleX, scaleY);
 
     // Move the video to the left by 50% of the original width
-    const width = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
-    mesh.position.x -= width * 0.25; // Shift by 50% of the original width
+    const bbox = mesh.geometry.boundingBox;
+    const width = bbox.max.x - bbox.min.x;
+
+    // Adjust the position
+    mesh.position.x -= width * scaleX * 0.5; // Move by 50% of the original width
 }
 
 function onUserInteractionStart() {
