@@ -196,9 +196,9 @@ function setupModelControls() {
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-            // Ensure the video fits exactly
-            fitTextureToMesh(glass2);
-            fitTextureToMesh(glass2Glass1_0);
+            // Make the video 50% smaller and move to the left by 50%
+            scaleAndPositionVideo(glass2);
+            scaleAndPositionVideo(glass2Glass1_0);
         } else {
             console.error('Video texture is not available.');
         }
@@ -233,16 +233,13 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function fitTextureToMesh(mesh) {
-    if (!mesh.geometry.boundingBox) {
-        mesh.geometry.computeBoundingBox();
-    }
-    const bbox = mesh.geometry.boundingBox;
-    const scaleFactorX = mesh.scale.x / (bbox.max.x - bbox.min.x);
-    const scaleFactorY = mesh.scale.y / (bbox.max.y - bbox.min.y);
+function scaleAndPositionVideo(mesh) {
+    // Reduce the scale to 50%
+    mesh.scale.set(mesh.scale.x * 0.5, mesh.scale.y * 0.5, mesh.scale.z);
 
-    // Adjust the repeat values based on scale factors
-    mesh.material.map.repeat.set(scaleFactorX, scaleFactorY);
+    // Move the video to the left by 50% of the original width
+    const width = mesh.geometry.boundingBox.max.x - mesh.geometry.boundingBox.min.x;
+    mesh.position.x -= width * 0.25; // Shift by 50% of the original width
 }
 
 function onUserInteractionStart() {
