@@ -234,9 +234,15 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
-    // Compute bounding box if not already computed
+    // Ensure the mesh's geometry has a bounding box
     if (!mesh.geometry.boundingBox) {
         mesh.geometry.computeBoundingBox();
+    }
+
+    // Verify bounding box is computed
+    if (!mesh.geometry.boundingBox) {
+        console.error('Bounding box computation failed.');
+        return;
     }
 
     const bbox = mesh.geometry.boundingBox;
