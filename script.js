@@ -151,6 +151,11 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+
+        // Adjust texture to fit perfectly
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+        videoTexture.repeat.set(1, 1); // Adjust repeat values if necessary
     });
 
     video.addEventListener('error', (e) => {
@@ -191,9 +196,9 @@ function setupModelControls() {
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-            // Adjust the scale to make the video smaller
-            glass2.scale.set(0.5 * glass2.scale.x, 0.5 * glass2.scale.y, glass2.scale.z);
-            glass2Glass1_0.scale.set(0.5 * glass2Glass1_0.scale.x, 0.5 * glass2Glass1_0.scale.y, glass2Glass1_0.scale.z);
+            // Ensure the video fits exactly
+            fitTextureToMesh(glass2);
+            fitTextureToMesh(glass2Glass1_0);
         } else {
             console.error('Video texture is not available.');
         }
@@ -228,6 +233,17 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
+function fitTextureToMesh(mesh) {
+    if (!mesh.geometry.boundingBox) {
+        mesh.geometry.computeBoundingBox();
+    }
+    const bbox = mesh.geometry.boundingBox;
+    const scaleFactorX = mesh.scale.x / (bbox.max.x - bbox.min.x);
+    const scaleFactorY = mesh.scale.y / (bbox.max.y - bbox.min.y);
+
+    // Adjust the repeat values based on scale factors
+    mesh.material.map.repeat.set(scaleFactorX, scaleFactorY);
+}
 
 function onUserInteractionStart() {
     userInteracting = true;
