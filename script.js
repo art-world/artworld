@@ -234,23 +234,25 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
+    // Compute bounding box if not already computed
     if (!mesh.geometry.boundingBox) {
         mesh.geometry.computeBoundingBox();
     }
 
-    // Scale the video texture down to 50%
-    const scaleX = 0.5;
-    const scaleY = 0.5;
-
-    // Adjust UV mapping to maintain aspect ratio
-    mesh.material.map.repeat.set(scaleX, scaleY);
-
-    // Move the video to the left by 50% of the original width
     const bbox = mesh.geometry.boundingBox;
     const width = bbox.max.x - bbox.min.x;
 
-    // Adjust the position
-    mesh.position.x -= width * scaleX * 0.5; // Move by 50% of the original width
+    // Scale the mesh down by 50%
+    const scaleX = 0.5;
+    const scaleY = 0.5;
+    mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
+
+    // Adjust the position: move left by 50% of the original width
+    mesh.position.x -= width * scaleX * 0.5; // Move left
+
+    // Ensure the video texture fills the scaled-down mesh
+    mesh.material.map.repeat.set(1 / scaleX, 1 / scaleY);
+    mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
 }
 
 function onUserInteractionStart() {
