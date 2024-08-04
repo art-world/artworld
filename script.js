@@ -187,12 +187,13 @@ function setupModelControls() {
         console.log('Play button pressed.'); 
         playAudio(audioFiles[currentAudioIndex]); 
         if (videoTexture) {
+            // Set the video texture as the material's map
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-            // Automatically scale and align the video texture to fit the areas on the model
-            fitTextureToArea(glass2.material.map, glass2.scale.x, glass2.scale.y);
-            fitTextureToArea(glass2Glass1_0.material.map, glass2Glass1_0.scale.x, glass2Glass1_0.scale.y);
+            // Adjust the scale to make the video smaller
+            glass2.scale.set(0.5 * glass2.scale.x, 0.5 * glass2.scale.y, glass2.scale.z);
+            glass2Glass1_0.scale.set(0.5 * glass2Glass1_0.scale.x, 0.5 * glass2Glass1_0.scale.y, glass2Glass1_0.scale.z);
         } else {
             console.error('Video texture is not available.');
         }
