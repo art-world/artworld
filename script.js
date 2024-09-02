@@ -188,21 +188,32 @@ function setupModelControls() {
         console.error('One or more buttons or the screen textures are not found on the model.');
         return;
     }
-    playButton.userData = { action: () => { 
-        console.log('Play button pressed.'); 
-        playAudio(audioFiles[currentAudioIndex]); 
-        if (videoTexture) {
-            // Set the video texture as the material's map
-            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-            // Make the video 50% smaller and move to the left by 50%
-            scaleAndPositionVideo(glass2);
-            scaleAndPositionVideo(glass2Glass1_0);
-        } else {
-            console.error('Video texture is not available.');
+    playButton.userData = { 
+        action: () => { 
+            console.log('Play button pressed.'); 
+            playAudio(audioFiles[currentAudioIndex]); 
+            if (videoTexture) {
+                // Traverse to find meshes and apply video texture
+                glass2.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                        scaleAndPositionVideo(child);
+                    }
+                });
+
+                glass2Glass1_0.traverse((child) => {
+                    if (child.isMesh) {
+                        child.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                        scaleAndPositionVideo(child);
+                    }
+                });
+            } else {
+                console.error('Video texture is not available.');
+            }
         }
-    }};
+    };
+
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
     backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
