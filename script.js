@@ -1,12 +1,6 @@
-let scene, camera, renderer, model, controls, videoTexture;
+let scene, camera, renderer, model, controls, videoTexture, shaderMaterial;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
-const loadingText = document.createElement('div');
-loadingText.innerText = 'Use the walkman buttons to play audio...';
-loadingText.style.textAlign = 'center';
-loadingScreen.appendChild(loadingText);
-const loadingPercentage = document.createElement('div');
-loadingScreen.appendChild(loadingPercentage);
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
@@ -15,7 +9,6 @@ let audioFiles = [
     'assets/audio/91_WIP_.mp3'
 ];
 let currentAudioIndex = 0;
-let userInteracting = false;
 let video;
 
 init();
@@ -103,13 +96,6 @@ function init() {
             controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
             controls.update();
 
-            // Increase the envMapIntensity for all materials in the model
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.envMapIntensity = 2; // Increase the intensity
-                }
-            });
-
             setupModelControls();
             loadingScreen.style.display = 'none';
             container.style.display = 'block';
@@ -132,7 +118,7 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create and add video texture
+    // Create video texture
     createVideoTexture();
 }
 
@@ -152,10 +138,33 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Adjust texture to fit perfectly
-        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
-        videoTexture.repeat.set(1, 1); // Adjust repeat values if necessary
+        // Create a custom shader material using the video texture
+        shaderMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+                texture1: { value: videoTexture },
+                iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) }
+            },
+            vertexShader: `
+                varying vec2 vUv;
+                void main() {
+                    vUv = uv;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform sampler2D texture1;
+                uniform vec2 iResolution;
+                varying vec2 vUv;
+
+                void main() {
+                    vec2 uv = vUv;
+                    uv.y = 1.0 - uv.y; // Flip Y coordinate for correct orientation
+                    vec4 color = texture2D(texture1, uv);
+                    gl_FragColor = color;
+                }
+            `
+        });
+
     });
 
     video.addEventListener('error', (e) => {
@@ -193,23 +202,12 @@ function setupModelControls() {
         action: () => { 
             console.log('Play button pressed.'); 
             playAudio(audioFiles[currentAudioIndex]); 
-            if (videoTexture) {
-                // Traverse to find meshes and apply video texture
-                glass2.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                        scaleAndPositionVideo(child);
-                    }
-                });
-
-                glass2Glass1_0.traverse((child) => {
-                    if (child.isMesh) {
-                        child.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                        scaleAndPositionVideo(child);
-                    }
-                });
+            if (shaderMaterial) {
+                // Apply the custom shader material with the video texture to the glass screens
+                glass2.material = shaderMaterial;
+                glass2Glass1_0.material = shaderMaterial;
             } else {
-                console.error('Video texture is not available.');
+                console.error('Shader material is not available.');
             }
         }
     };
@@ -244,49 +242,6 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function scaleAndPositionVideo(mesh) {
-    // Check if the object is a Mesh and has geometry
-    if (!mesh.isMesh || !mesh.geometry) {
-        console.error('The provided object is not a Mesh or does not have geometry.');
-        return;
-    }
-
-    // Compute the bounding box if it doesn't exist
-    if (!mesh.geometry.boundingBox) {
-        mesh.geometry.computeBoundingBox();
-    }
-
-    // Verify bounding box is computed
-    if (!mesh.geometry.boundingBox) {
-        console.error('Bounding box computation failed.');
-        return;
-    }
-
-    const bbox = mesh.geometry.boundingBox;
-    const width = bbox.max.x - bbox.min.x;
-    const height = bbox.max.y - bbox.min.y;
-
-    // Reset the scale and position if needed
-    mesh.scale.set(1, 1, 1);
-    mesh.position.set(0, 0, 0);
-
-    // Scale the mesh down by 50% and move to the left by 50%
-    const scaleX = 0.5;
-    const scaleY = 0.5;
-    mesh.scale.set(scaleX, scaleY, 1);
-
-    // Adjust the position: move left by 50% of the original width
-    mesh.position.x -= width * scaleX * 0.5; // Move left
-
-    // Adjust texture scaling and positioning
-    if (mesh.material.map) {
-        mesh.material.map.repeat.set(1, 1); // Ensure full texture is displayed
-        mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
-    } else {
-        console.error('Mesh material map is not available.');
-    }
-}
-
 function onUserInteractionStart() {
     userInteracting = true;
     controls.autoRotate = false;
@@ -301,6 +256,9 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    if (shaderMaterial && shaderMaterial.uniforms.iResolution) {
+        shaderMaterial.uniforms.iResolution.value.set(window.innerWidth, window.innerHeight);
+    }
 }
 
 function animate() {
