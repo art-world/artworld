@@ -1,6 +1,17 @@
 let scene, camera, renderer, model, controls, videoTexture, shaderMaterial;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
+
+// Create and append loading text
+const loadingText = document.createElement('div');
+loadingText.innerText = 'Use the walkman buttons to play audio...';
+loadingText.style.textAlign = 'center';
+loadingScreen.appendChild(loadingText);
+
+// Create and append loading percentage text
+const loadingPercentage = document.createElement('div');
+loadingScreen.appendChild(loadingPercentage);
+
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
