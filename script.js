@@ -234,9 +234,9 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
-    // Ensure the mesh's geometry exists
-    if (!mesh.geometry) {
-        console.error('Mesh geometry is not available.');
+    // Check if the object is a Mesh and has geometry
+    if (!mesh.isMesh || !mesh.geometry) {
+        console.error('The provided object is not a Mesh or does not have geometry.');
         return;
     }
 
