@@ -234,7 +234,13 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
-    // Ensure the mesh's geometry has a bounding box
+    // Ensure the mesh's geometry exists
+    if (!mesh.geometry) {
+        console.error('Mesh geometry is not available.');
+        return;
+    }
+
+    // Compute the bounding box if it doesn't exist
     if (!mesh.geometry.boundingBox) {
         mesh.geometry.computeBoundingBox();
     }
@@ -262,8 +268,12 @@ function scaleAndPositionVideo(mesh) {
     mesh.position.x -= width * scaleX * 0.5; // Move left
 
     // Adjust texture scaling and positioning
-    mesh.material.map.repeat.set(1, 1); // Ensure full texture is displayed
-    mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
+    if (mesh.material.map) {
+        mesh.material.map.repeat.set(1, 1); // Ensure full texture is displayed
+        mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
+    } else {
+        console.error('Mesh material map is not available.');
+    }
 }
 
 function onUserInteractionStart() {
