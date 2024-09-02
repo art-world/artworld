@@ -247,17 +247,22 @@ function scaleAndPositionVideo(mesh) {
 
     const bbox = mesh.geometry.boundingBox;
     const width = bbox.max.x - bbox.min.x;
+    const height = bbox.max.y - bbox.min.y;
 
-    // Scale the mesh down by 50%
+    // Reset the scale and position if needed
+    mesh.scale.set(1, 1, 1);
+    mesh.position.set(0, 0, 0);
+
+    // Scale the mesh down by 50% and move to the left by 50%
     const scaleX = 0.5;
     const scaleY = 0.5;
-    mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
+    mesh.scale.set(scaleX, scaleY, 1);
 
     // Adjust the position: move left by 50% of the original width
     mesh.position.x -= width * scaleX * 0.5; // Move left
 
-    // Ensure the video texture fills the scaled-down mesh
-    mesh.material.map.repeat.set(1 / scaleX, 1 / scaleY);
+    // Adjust texture scaling and positioning
+    mesh.material.map.repeat.set(1, 1); // Ensure full texture is displayed
     mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
 }
 
