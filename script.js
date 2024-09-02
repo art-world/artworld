@@ -205,6 +205,7 @@ function setupModelControls() {
     const backwardButton = model.getObjectByName('BackwardButton');
     const glass2 = model.getObjectByName('Glass2');
     const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    const screen = model.getObjectByName('Screen_Screen1_0'); // New reference screen
 
     console.log("Buttons and Screens:", {
         playButton,
@@ -212,13 +213,25 @@ function setupModelControls() {
         forwardButton,
         backwardButton,
         glass2,
-        glass2Glass1_0
+        glass2Glass1_0,
+        screen
     });
 
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0 || !screen) {
         console.error('One or more buttons or the screen textures are not found on the model.');
         return;
     }
+
+    // Compute bounding box of the reference screen
+    if (!screen.geometry.boundingBox) {
+        screen.geometry.computeBoundingBox();
+    }
+    const bbox = screen.geometry.boundingBox;
+    const screenDimensions = {
+        width: bbox.max.x - bbox.min.x,
+        height: bbox.max.y - bbox.min.y,
+        center: bbox.getCenter(new THREE.Vector3())
+    };
 
     playButton.userData = { 
         action: () => { 
@@ -226,8 +239,8 @@ function setupModelControls() {
             playAudio(audioFiles[currentAudioIndex]); 
             if (shaderMaterial) {
                 // Apply the custom shader material with the video texture to the glass screens
-                glass2.material = shaderMaterial;
-                glass2Glass1_0.material = shaderMaterial;
+                applyVideoTexture(glass2, screenDimensions);
+                applyVideoTexture(glass2Glass1_0, screenDimensions);
             } else {
                 console.error('Shader material is not available.');
             }
@@ -262,6 +275,23 @@ function setupModelControls() {
     }
 
     window.addEventListener('mousedown', onDocumentMouseDown, false);
+}
+
+// Function to apply the video texture and fit it to the screen's bounding box
+function applyVideoTexture(mesh, screenDimensions) {
+    if (mesh.geometry && shaderMaterial) {
+        mesh.material = shaderMaterial;
+
+        // Scale the mesh to fit the screen dimensions
+        const scaleX = screenDimensions.width / mesh.geometry.boundingBox.max.x;
+        const scaleY = screenDimensions.height / mesh.geometry.boundingBox.max.y;
+        mesh.scale.set(scaleX, scaleY, 1);
+
+        // Position the mesh at the center of the screen
+        mesh.position.copy(screenDimensions.center);
+    } else {
+        console.error('Mesh or shader material is not available.');
+    }
 }
 
 function onUserInteractionStart() {
