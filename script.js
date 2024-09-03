@@ -186,7 +186,6 @@ function createVideoTexture() {
                 }
             `
         });
-
     });
 
     video.addEventListener('error', (e) => {
@@ -237,12 +236,17 @@ function setupModelControls() {
         action: () => { 
             console.log('Play button pressed.'); 
             playAudio(audioFiles[currentAudioIndex]); 
-            if (shaderMaterial) {
-                // Apply the custom shader material with the video texture to the glass screens
+            
+            // Check if mesh and shader material are ready
+            if (glass2 && shaderMaterial) {
                 applyVideoTexture(glass2, screenDimensions);
+            } else {
+                console.error('Glass2 mesh or shader material is not available.');
+            }
+            if (glass2Glass1_0 && shaderMaterial) {
                 applyVideoTexture(glass2Glass1_0, screenDimensions);
             } else {
-                console.error('Shader material is not available.');
+                console.error('Glass2_Glass1_0 mesh or shader material is not available.');
             }
         }
     };
@@ -277,7 +281,6 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-// Function to apply the video texture and fit it to the screen's bounding box
 function applyVideoTexture(mesh, screenDimensions) {
     if (mesh.geometry && shaderMaterial) {
         mesh.material = shaderMaterial;
