@@ -149,49 +149,34 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Create a custom shader material using the video texture
-        shaderMaterial = new THREE.ShaderMaterial({
-            uniforms: {
-                texture1: { value: videoTexture },
-                iResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
-                iAspectRatio: { value: video.videoWidth / video.videoHeight },  // Aspect ratio of the video
-            },
-            vertexShader: `
-                varying vec2 vUv;
-                void main() {
-                    vUv = uv;
-                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-                }
-            `,
-            fragmentShader: `
-                uniform sampler2D texture1;
-                uniform vec2 iResolution;
-                uniform float iAspectRatio;
-                varying vec2 vUv;
-
-                void main() {
-                    vec2 uv = vUv;
-                    
-                    // Correct aspect ratio
-                    float screenAspectRatio = iResolution.x / iResolution.y;
-                    if (screenAspectRatio > iAspectRatio) {
-                        uv.x = (uv.x - 0.5) * screenAspectRatio / iAspectRatio + 0.5;
-                    } else {
-                        uv.y = (uv.y - 0.5) * iAspectRatio / screenAspectRatio + 0.5;
-                    }
-
-                    // Apply the texture
-                    vec4 color = texture2D(texture1, uv);
-                    gl_FragColor = color;
-                }
-            `
-        });
+        // Apply the video texture to the material of the glass part directly
+        applyVideoTextureToMaterial();
     });
 
     video.addEventListener('error', (e) => {
         console.error('Error loading video:', e);
     });
 }
+
+function applyVideoTextureToMaterial() {
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+
+    if (glass2) {
+        glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        console.log('Video texture applied to Glass2');
+    } else {
+        console.error('Glass2 mesh is not available.');
+    }
+
+    if (glass2Glass1_0) {
+        glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        console.log('Video texture applied to Glass2_Glass1_0');
+    } else {
+        console.error('Glass2_Glass1_0 mesh is not available.');
+    }
+}
+
 
 function setupModelControls() {
     if (!model) {
