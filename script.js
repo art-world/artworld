@@ -149,11 +149,10 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Set texture parameters to handle scaling
-        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+        // Simple approach: scale the texture down
+        videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
+        videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
 
-        // Apply video texture to material once it's ready
         applyVideoTextureToMaterial();
     });
 
