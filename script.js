@@ -148,6 +148,17 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+
+        // Set texture parameters to handle scaling
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+
+        // Optionally adjust repeat and offset to fit the screen exactly (if needed)
+        videoTexture.repeat.set(1, 1);
+        videoTexture.offset.set(0, 0);
+
+        // Apply video texture to material once it's ready
+        applyVideoTextureToMaterial();
     });
 
     video.addEventListener('error', (e) => {
@@ -161,25 +172,21 @@ function setupModelControls() {
         return;
     }
 
-    // Debugging: Log all objects in the model to find the correct names
-    model.traverse((child) => {
-        console.log('Object in model:', child.name);
-    });
-
+    // Correct capitalization to match the object names in the model
     const playButton = model.getObjectByName('PlayButton');
     const pauseButton = model.getObjectByName('PauseButton');
     const forwardButton = model.getObjectByName('ForwardButton');
     const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-    const glass1 = model.getObjectByName('Glass1');
+    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    const Glass1 = model.getObjectByName('Glass1');
 
     console.log("Buttons and Screens:", {
         playButton,
         pauseButton,
         forwardButton,
         backwardButton,
-        glass2_Glass1_0,
-        glass1
+        Glass2_Glass1_0,
+        Glass1
     });
 
     // Check if objects are found
@@ -187,11 +194,11 @@ function setupModelControls() {
         console.error('One or more buttons are not found on the model.');
     }
 
-    if (!glass2_Glass1_0) {
+    if (!Glass2_Glass1_0) {
         console.error('Glass2_Glass1_0 mesh is not available.');
     }
 
-    if (!glass1) {
+    if (!Glass1) {
         console.error('Glass1 mesh is not available.');
     }
 
@@ -202,10 +209,8 @@ function setupModelControls() {
                 console.log('Play button pressed.'); 
                 playAudio(audioFiles[currentAudioIndex]);
 
-                // Check if mesh and shader material are ready
-                if (glass2_Glass1_0 && videoTexture) {
-                    applyVideoTextureToMaterial();
-                }
+                // Apply video texture when button is pressed
+                applyVideoTextureToMaterial();
             }
         };
     }
@@ -249,16 +254,16 @@ function setupModelControls() {
 }
 
 function applyVideoTextureToMaterial() {
-    const glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-    const glass1 = model.getObjectByName('Glass1');
+    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    const Glass1 = model.getObjectByName('Glass1');
 
-    if (glass2_Glass1_0) {
-        glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+    if (Glass2_Glass1_0) {
+        Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
         console.log('Video texture applied to Glass2_Glass1_0');
     }
 
-    if (glass1) {
-        glass1.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+    if (Glass1) {
+        Glass1.material = new THREE.MeshBasicMaterial({ map: videoTexture });
         console.log('Video texture applied to Glass1');
     }
 }
