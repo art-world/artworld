@@ -198,30 +198,19 @@ function setupModelControls() {
         console.error('Model is not loaded.');
         return;
     }
+
+    // Access model parts
     const playButton = model.getObjectByName('PlayButton');
-    const pauseButton = model.getObjectByName('PauseButton');
-    const forwardButton = model.getObjectByName('ForwardButton');
-    const backwardButton = model.getObjectByName('BackwardButton');
     const glass2 = model.getObjectByName('Glass2');
     const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-    const screen = model.getObjectByName('Screen_Screen1_0'); // New reference screen
+    const screen = model.getObjectByName('Screen_Screen1_0');
 
-    console.log("Buttons and Screens:", {
-        playButton,
-        pauseButton,
-        forwardButton,
-        backwardButton,
-        glass2,
-        glass2Glass1_0,
-        screen
-    });
-
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0 || !screen) {
-        console.error('One or more buttons or the screen textures are not found on the model.');
+    if (!playButton || !glass2 || !glass2Glass1_0 || !screen) {
+        console.error('Required objects are missing.');
         return;
     }
 
-    // Compute bounding box of the reference screen
+    // Compute the bounding box of the reference screen
     if (!screen.geometry.boundingBox) {
         screen.geometry.computeBoundingBox();
     }
@@ -232,19 +221,19 @@ function setupModelControls() {
         center: bbox.getCenter(new THREE.Vector3())
     };
 
-    playButton.userData = { 
-        action: () => { 
-            console.log('Play button pressed.'); 
-            playAudio(audioFiles[currentAudioIndex]); 
-            
-            // Check if mesh and shader material are ready
+    playButton.userData = {
+        action: () => {
+            console.log('Play button pressed.');
+            playAudio(audioFiles[currentAudioIndex]);
+
+            // Apply the video texture when ready
             if (glass2 && shaderMaterial) {
-                applyVideoTexture(glass2, screenDimensions);
+                requestAnimationFrame(() => applyVideoTexture(glass2, screenDimensions));
             } else {
                 console.error('Glass2 mesh or shader material is not available.');
             }
             if (glass2Glass1_0 && shaderMaterial) {
-                applyVideoTexture(glass2Glass1_0, screenDimensions);
+                requestAnimationFrame(() => applyVideoTexture(glass2Glass1_0, screenDimensions));
             } else {
                 console.error('Glass2_Glass1_0 mesh or shader material is not available.');
             }
@@ -283,9 +272,13 @@ function setupModelControls() {
 
 function applyVideoTexture(mesh, screenDimensions) {
     if (mesh.geometry && shaderMaterial) {
+        if (!mesh.geometry.boundingBox) {
+            mesh.geometry.computeBoundingBox();
+        }
+
         mesh.material = shaderMaterial;
 
-        // Scale the mesh to fit the screen dimensions
+        // Compute scaling
         const scaleX = screenDimensions.width / mesh.geometry.boundingBox.max.x;
         const scaleY = screenDimensions.height / mesh.geometry.boundingBox.max.y;
         mesh.scale.set(scaleX, scaleY, 1);
