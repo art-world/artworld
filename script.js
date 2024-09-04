@@ -219,6 +219,8 @@ function applyVideoTextureToMaterial() {
     if (Glass2_Glass1_0) {
         Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
         console.log('Video texture applied to Glass2_Glass1_0');
+    } else {
+        console.error('Glass2_Glass1_0 is not available when applying video texture.');
     }
 }
 
