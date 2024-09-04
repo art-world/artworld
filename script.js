@@ -129,7 +129,7 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create video texture
+    // Create video texture but don't play or apply it yet
     createVideoTexture();
 }
 
@@ -141,8 +141,6 @@ function createVideoTexture() {
 
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
-        video.play();
-        video.loop = true;
 
         videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
@@ -152,8 +150,6 @@ function createVideoTexture() {
         // Simple approach: scale the texture down
         videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
         videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
-
-        applyVideoTextureToMaterial();
     });
 
     video.addEventListener('error', (e) => {
@@ -178,9 +174,16 @@ function setupModelControls() {
         return;
     }
 
-    // Apply video texture when the model is ready
-    if (Glass2_Glass1_0) {
-        applyVideoTextureToMaterial();
+    // Set up play button to start the video and apply the texture
+    const playButton = model.getObjectByName('PlayButton');
+    if (playButton) {
+        playButton.userData = {
+            action: () => {
+                console.log('Play button pressed.');
+                video.play(); // Start the video
+                applyVideoTextureToMaterial(); // Apply the video texture
+            }
+        };
     }
 
     const raycaster = new THREE.Raycaster();
