@@ -1,3 +1,17 @@
+let scene, camera, renderer, model, controls, videoTexture;
+const container = document.getElementById('container');
+const loadingScreen = document.getElementById('loadingScreen');
+
+// Create and append loading text
+const loadingText = document.createElement('div');
+loadingText.innerText = 'Use the walkman buttons to play audio...';
+loadingText.style.textAlign = 'center';
+loadingScreen.appendChild(loadingText);
+
+// Create and append loading percentage text
+const loadingPercentage = document.createElement('div');
+loadingScreen.appendChild(loadingPercentage);
+
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
@@ -100,7 +114,7 @@ function init() {
         function(xhr) {
             // Calculate and display percentage
             const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
-            loadingPercentage.innerText = ${Math.round(percentComplete)}%;
+            loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
         },
         function (error) {
             console.error('Error loading model:', error);
@@ -134,8 +148,8 @@ function createVideoTexture() {
         videoTexture.format = THREE.RGBFormat;
 
         // Simple approach: scale the texture down
-        videoTexture.repeat.set(0.5, 0.5); // Scale down the video to fit better in the screen
-        videoTexture.offset.set(0.25, 0.25); // Adjust position if needed
+        videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
+        videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
     });
 
     video.addEventListener('error', (e) => {
