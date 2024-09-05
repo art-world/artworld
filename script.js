@@ -147,11 +147,6 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Scale down the video by setting repeat to a value less than 1
-        videoTexture.repeat.set(1, 1); // This scales down the video to 20% of the original size
-
-        // Adjust the offset to center the smaller video on the object
-        videoTexture.offset.set(0.4, 0.4); // Offset will depend on the repeat values to keep the video centered
     });
 
     video.addEventListener('error', (e) => {
