@@ -124,7 +124,7 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
 
-    // Create audio listener and loader
+    // audio listener and loader
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
@@ -147,9 +147,11 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Simple approach: scale the texture down
-        videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
-        videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
+        // Scale down the video by setting repeat to a value less than 1
+        videoTexture.repeat.set(0.2, 0.2); // This scales down the video to 20% of the original size
+
+        // Adjust the offset to center the smaller video on the object
+        videoTexture.offset.set(0.4, 0.4); // Offset will depend on the repeat values to keep the video centered
     });
 
     video.addEventListener('error', (e) => {
