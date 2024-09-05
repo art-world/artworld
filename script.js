@@ -147,15 +147,27 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Apply UV scaling directly to the material for scaling the video down
-        const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-        if (Glass2_Glass1_0) {
-            Glass2_Glass1_0.material.map = videoTexture;
-            Glass2_Glass1_0.material.needsUpdate = true;
+        // Make sure the model is loaded before applying the texture
+        if (model) {
+            const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+            if (Glass2_Glass1_0) {
+                // Apply the video texture to the material
+                Glass2_Glass1_0.material.map = videoTexture;
+                Glass2_Glass1_0.material.needsUpdate = true;
 
-            // Here's the magic: scaling the video down on the object's UV coordinates
-            Glass2_Glass1_0.material.map.repeat.set(0.5, 0.5); // Scale the video down to 50%
-            Glass2_Glass1_0.material.map.offset.set(0.25, 0.25); // Center the video after scaling
+                // Optionally adjust UV mapping, scale down if needed
+                Glass2_Glass1_0.material.map.repeat.set(0.5, 0.5); // Scaling video down
+                Glass2_Glass1_0.material.map.offset.set(0.25, 0.25); // Centering the video
+
+                // Now scale the model itself to fit the video better
+                Glass2_Glass1_0.scale.set(2, 2, 2); // Scale up the glass object
+
+                console.log('Glass object scaled up.');
+            } else {
+                console.error('Glass2_Glass1_0 not found in the model.');
+            }
+        } else {
+            console.error('Model is not loaded yet.');
         }
     });
 
@@ -163,7 +175,6 @@ function createVideoTexture() {
         console.error('Error loading video:', e);
     });
 }
-
 
 function setupModelControls() {
     if (!model) {
