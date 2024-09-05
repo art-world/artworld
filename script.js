@@ -78,9 +78,7 @@ function init() {
             console.log('Model loaded successfully.');
             model = gltf.scene;
             model.position.set(0, 0, 0);
-
-            // Scale the entire model up
-            model.scale.set(3, 3, 3); // Scale up the model while keeping video the same size
+            model.scale.set(200, 200, 200); // Scale the model up
             scene.add(model);
             
             isModelLoaded = true; // Mark the model as loaded
@@ -140,7 +138,7 @@ function applyTextureIfReady() {
             Glass2_Glass1_0.material.map = videoTexture;
             Glass2_Glass1_0.material.needsUpdate = true;
 
-            // Optionally scale the video down on the object's UV coordinates
+            // Optionally scale the video on the object's UV coordinates
             Glass2_Glass1_0.material.map.repeat.set(0.5, 0.5); // Adjust this to scale the video down
             Glass2_Glass1_0.material.map.offset.set(0.25, 0.25); // Center the video
 
