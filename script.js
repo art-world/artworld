@@ -134,8 +134,8 @@ function createVideoTexture() {
         videoTexture.format = THREE.RGBFormat;
 
         // Simple approach: scale the texture down
-        videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
-        videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
+        videoTexture.repeat.set(0.5, 0.5); // Scale down the video to fit better in the screen
+        videoTexture.offset.set(0.25, 0.25); // Adjust position if needed
     });
 
     video.addEventListener('error', (e) => {
