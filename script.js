@@ -248,17 +248,20 @@ function scaleAndPositionVideo(mesh) {
     const bbox = mesh.geometry.boundingBox;
     const width = bbox.max.x - bbox.min.x;
 
-    // Scale the mesh down by 50%
-    const scaleX = 0.5;
-    const scaleY = 0.5;
+    // Scale the mesh down (if you need to scale the actual mesh further)
+    const scaleX = 0.5;  // 50% scale on X-axis
+    const scaleY = 0.5;  // 50% scale on Y-axis
     mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
 
     // Adjust the position: move left by 50% of the original width
     mesh.position.x -= width * scaleX * 0.5; // Move left
 
-    // Ensure the video texture fills the scaled-down mesh
-    mesh.material.map.repeat.set(1 / scaleX, 1 / scaleY);
-    mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
+    // Now scale the video texture smaller
+    const videoScaleFactor = 0.3;  // 30% of the texture size
+    mesh.material.map.repeat.set(videoScaleFactor, videoScaleFactor);
+
+    // Adjust the offset to center the video in the mesh
+    mesh.material.map.offset.set((1 - videoScaleFactor) / 2, (1 - videoScaleFactor) / 2); // Center the video
 }
 
 function onUserInteractionStart() {
