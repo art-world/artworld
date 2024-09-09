@@ -138,7 +138,7 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Untitled.mp4'; // Path to the new video file
+    video.src = 'assets/Untitled.mp4'; // Path to your video file
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
 
@@ -152,10 +152,14 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Adjust texture to fit perfectly
-        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
-        videoTexture.repeat.set(1, 1); // Adjust repeat values if necessary
+        // Apply the video texture to the specific mesh (Glass2_Glass1_0)
+        const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+        if (Glass2_Glass1_0) {
+            Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            console.log('Video texture applied to Glass2_Glass1_0.');
+        } else {
+            console.error('Glass2_Glass1_0 not found in the model.');
+        }
     });
 
     video.addEventListener('error', (e) => {
