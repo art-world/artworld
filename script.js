@@ -138,7 +138,7 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
+    video.src = 'assets/Untitled.mp4'; // Path to the new video file
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
 
