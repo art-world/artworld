@@ -257,7 +257,7 @@ function scaleAndPositionVideo(mesh) {
 
     // Set a smaller scale factor to fit the video inside the mesh without zooming in
     let repeatX, repeatY, offsetX, offsetY;
-    const scaleFactor = 0.5;  // Reduce this value to zoom out
+    const scaleFactor = 0.5;  // Adjust this value to zoom out
 
     // Adjust repeat values and offsets based on the aspect ratios
     if (videoAspect > meshAspect) {
@@ -275,13 +275,6 @@ function scaleAndPositionVideo(mesh) {
     }
 
     // Apply repeat and offset to fit and center the video
-    mesh.material.map.repeat.set(repeatX, repeatY);
-    mesh.material.map.offset.set(offsetX, offsetY);
-
-    console.log(`Video scaling adjusted: repeatX = ${repeatX}, repeatY = ${repeatY}, offsetX = ${offsetX}, offsetY = ${offsetY}`);
-}
-
-    // Apply the repeat and offset values to fit and center the video
     mesh.material.map.repeat.set(repeatX, repeatY);
     mesh.material.map.offset.set(offsetX, offsetY);
 
