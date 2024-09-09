@@ -248,15 +248,36 @@ function scaleAndPositionVideo(mesh) {
     }
 
     const bbox = mesh.geometry.boundingBox;
-    const width = bbox.max.x - bbox.min.x;
-    const height = bbox.max.y - bbox.min.y;
+    const meshWidth = bbox.max.x - bbox.min.x;
+    const meshHeight = bbox.max.y - bbox.min.y;
 
-    // Define a scaling factor for reducing the video size
-    const scaleFactor = 0.3;  // Reduces the video size to 50% of the mesh's area
+    // Get the aspect ratio of the video and the mesh
+    const videoAspect = video.videoWidth / video.videoHeight;
+    const meshAspect = meshWidth / meshHeight;
 
-    // Set repeat and offset to scale the video down uniformly
-    mesh.material.map.repeat.set(1 / scaleFactor, 1 / scaleFactor); // Scale the video to fit inside the mesh
-    mesh.material.map.offset.set((1 - 1 / scaleFactor) / 2, (1 - 1 / scaleFactor) / 2); // Center the video
+    // Set default scale factor for the video size
+    const scaleFactor = 0.3; // Adjust this to control overall size of the video
+
+    let repeatX, repeatY, offsetX, offsetY;
+
+    // Adjust repeat values and offsets based on aspect ratios
+    if (videoAspect > meshAspect) {
+        // Video is wider than the mesh, so fit based on width
+        repeatX = 1 / scaleFactor;
+        repeatY = (meshAspect / videoAspect) / scaleFactor;
+        offsetX = (1 - repeatX) / 2;
+        offsetY = (1 - repeatY) / 2;
+    } else {
+        // Video is taller than or equal to the mesh, so fit based on height
+        repeatX = (videoAspect / meshAspect) / scaleFactor;
+        repeatY = 1 / scaleFactor;
+        offsetX = (1 - repeatX) / 2;
+        offsetY = (1 - repeatY) / 2;
+    }
+
+    // Apply repeat and offset to fit and center the video
+    mesh.material.map.repeat.set(repeatX, repeatY);
+    mesh.material.map.offset.set(offsetX, offsetY);
 
     console.log(`Video scaled down by a factor of ${scaleFactor}`);
 }
