@@ -197,8 +197,6 @@ function setupModelControls() {
             // Set the video texture as the material's map
             Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-            // Make the video 50% smaller and move to the left by 50%
-            scaleAndPositionVideo(Glass2_Glass1_0);
         } else {
             console.error('Video texture is not available.');
         }
