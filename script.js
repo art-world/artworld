@@ -155,8 +155,13 @@ function createVideoTexture() {
         // Apply the video texture to the specific mesh (Glass2_Glass1_0)
         const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
         if (Glass2_Glass1_0) {
+            // Make the video smaller by increasing the repeat values (zoom out effect)
+            videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+            videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+            videoTexture.repeat.set(2, 2);  // Change these values to adjust size (e.g., 2 means 50% smaller)
+
             Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            console.log('Video texture applied to Glass2_Glass1_0.');
+            console.log('Video texture applied to Glass2_Glass1_0 and scaled down.');
         } else {
             console.error('Glass2_Glass1_0 not found in the model.');
         }
