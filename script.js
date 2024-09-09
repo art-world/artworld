@@ -255,31 +255,29 @@ function scaleAndPositionVideo(mesh) {
     const videoAspect = video.videoWidth / video.videoHeight;
     const meshAspect = meshWidth / meshHeight;
 
-    // Set default scale factor for the video size
-    const scaleFactor = 0.3; // Adjust this to control overall size of the video
-
+    // Set scaleFactor as 1 since we're trying to fit the video exactly
     let repeatX, repeatY, offsetX, offsetY;
 
-    // Adjust repeat values and offsets based on aspect ratios
+    // Adjust repeat and offset based on the aspect ratios
     if (videoAspect > meshAspect) {
-        // Video is wider than the mesh, so fit based on width
-        repeatX = 1 / scaleFactor;
-        repeatY = (meshAspect / videoAspect) / scaleFactor;
-        offsetX = (1 - repeatX) / 2;
-        offsetY = (1 - repeatY) / 2;
+        // Video is wider than the mesh, fit based on width
+        repeatX = 1;
+        repeatY = meshAspect / videoAspect;
+        offsetX = 0; // No offset horizontally
+        offsetY = (1 - repeatY) / 2; // Center vertically
     } else {
-        // Video is taller than or equal to the mesh, so fit based on height
-        repeatX = (videoAspect / meshAspect) / scaleFactor;
-        repeatY = 1 / scaleFactor;
-        offsetX = (1 - repeatX) / 2;
-        offsetY = (1 - repeatY) / 2;
+        // Video is taller than or equal to the mesh, fit based on height
+        repeatX = videoAspect / meshAspect;
+        repeatY = 1;
+        offsetX = (1 - repeatX) / 2; // Center horizontally
+        offsetY = 0; // No offset vertically
     }
 
-    // Apply repeat and offset to fit and center the video
+    // Apply the repeat and offset values to fit and center the video
     mesh.material.map.repeat.set(repeatX, repeatY);
     mesh.material.map.offset.set(offsetX, offsetY);
 
-    console.log(`Video scaled down by a factor of ${scaleFactor}`);
+    console.log(`Video scaling adjusted: repeatX = ${repeatX}, repeatY = ${repeatY}, offsetX = ${offsetX}, offsetY = ${offsetY}`);
 }
 
 function onUserInteractionStart() {
