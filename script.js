@@ -249,21 +249,27 @@ function scaleAndPositionVideo(mesh) {
 
     const bbox = mesh.geometry.boundingBox;
     const width = bbox.max.x - bbox.min.x;
+    const height = bbox.max.y - bbox.min.y;
 
-    // Scale the mesh down (if you need to scale the actual mesh further)
-    const scaleX = 0.5;  // 50% scale on X-axis
-    const scaleY = 0.5;  // 50% scale on Y-axis
-    mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
+    // Set the video texture to fit the mesh exactly
+    mesh.material.map.repeat.set(1, 1); // Ensure no scaling on texture itself
+    mesh.material.map.offset.set(0, 0); // Align the texture to start from top-left
 
-    // Adjust the position: move left by 50% of the original width
-    mesh.position.x -= width * scaleX * 0.5; // Move left
+    // If the video texture ratio doesn't match the mesh, adjust the repeat to fit
+    const textureAspect = video.videoWidth / video.videoHeight;
+    const meshAspect = width / height;
 
-    // Now scale the video texture smaller
-    const videoScaleFactor = 0.3;  // 30% of the texture size
-    mesh.material.map.repeat.set(videoScaleFactor, videoScaleFactor);
-
-    // Adjust the offset to center the video in the mesh
-    mesh.material.map.offset.set((1 - videoScaleFactor) / 2, (1 - videoScaleFactor) / 2); // Center the video
+    if (textureAspect > meshAspect) {
+        // If the video is wider than the mesh, scale down the width of the video
+        const repeatX = meshAspect / textureAspect;
+        mesh.material.map.repeat.set(repeatX, 1);
+        mesh.material.map.offset.set((1 - repeatX) / 2, 0); // Center the video horizontally
+    } else {
+        // If the video is taller than the mesh, scale down the height of the video
+        const repeatY = textureAspect / meshAspect;
+        mesh.material.map.repeat.set(1, repeatY);
+        mesh.material.map.offset.set(0, (1 - repeatY) / 2); // Center the video vertically
+    }
 }
 
 function onUserInteractionStart() {
