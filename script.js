@@ -155,13 +155,17 @@ function createVideoTexture() {
         // Apply the video texture to the specific mesh (Glass2_Glass1_0)
         const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
         if (Glass2_Glass1_0) {
-            // Make the video smaller by increasing the repeat values (zoom out effect)
-            videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-            videoTexture.wrapT = THREE.ClampToEdgeWrapping;
-            videoTexture.repeat.set(9, 9);  // Change these values to adjust size (e.g., 2 means 50% smaller)
-
-            Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            console.log('Video texture applied to Glass2_Glass1_0 and scaled down.');
+            // Ensure UV mapping exists and scale the texture if necessary
+            const uvAttribute = Glass2_Glass1_0.geometry.attributes.uv;
+            if (uvAttribute) {
+                console.log('UV mapping found, adjusting texture');
+                videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+                videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+                videoTexture.repeat.set(1, 1); // Set this to (1, 1) to start, adjust if necessary
+                Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            } else {
+                console.error('No UV mapping available on Glass2_Glass1_0');
+            }
         } else {
             console.error('Glass2_Glass1_0 not found in the model.');
         }
