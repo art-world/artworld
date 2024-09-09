@@ -42,7 +42,7 @@ function init() {
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
-    // Lighting
+    // Lighting setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
     scene.add(ambientLight);
     console.log('Ambient light added.');
@@ -110,16 +110,19 @@ function init() {
                 }
             });
 
-            setupModelControls();
+            // Now that the model is loaded, create the video texture
+            createVideoTexture();
+
+            // Rest of the model loading process
             loadingScreen.style.display = 'none';
             container.style.display = 'block';
         },
         function(xhr) {
-            // Calculate and display percentage
+            // Loading progress
             const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
             loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
         },
-        function (error) {
+        function(error) {
             console.error('Error loading model:', error);
         }
     );
@@ -131,9 +134,6 @@ function init() {
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
-
-    // Create and add video texture
-    createVideoTexture();
 }
 
 function createVideoTexture() {
@@ -156,10 +156,7 @@ function createVideoTexture() {
         if (Glass2_Glass1_0) {
             // Apply the video texture
             Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-
-            // Scale the mesh to make the video appear smaller
-            Glass2_Glass1_0.scale.set(0.5, 0.5, 0.5);  // Change values to adjust size
-            console.log('Video texture applied to Glass2_Glass1_0 and mesh scaled down.');
+            console.log('Video texture applied to Glass2_Glass1_0.');
         } else {
             console.error('Glass2_Glass1_0 not found in the model.');
         }
@@ -199,7 +196,6 @@ function setupModelControls() {
         if (videoTexture) {
             // Set the video texture as the material's map
             Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-
         } else {
             console.error('Video texture is not available.');
         }
