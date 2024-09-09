@@ -1,21 +1,6 @@
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
-const loadingScreen = document.getElementById('loadingScreen');
-const loadingText = document.createElement('div');
-loadingText.innerText = 'Use the walkman buttons to play audio...';
-loadingText.style.textAlign = 'center';
-loadingScreen.appendChild(loadingText);
-const loadingPercentage = document.createElement('div');
-loadingScreen.appendChild(loadingPercentage);
 let audioLoader, listener, sound;
-let audioFiles = [
-    'assets/audio/11_WIP_.mp3',
-    'assets/audio/86_WIP_.mp3',
-    'assets/audio/90 V1_WIP_.mp3',
-    'assets/audio/91_WIP_.mp3'
-];
-let currentAudioIndex = 0;
-let userInteracting = false;
 let video;
 
 init();
@@ -23,109 +8,41 @@ animate();
 
 function init() {
     console.log('Initializing scene...');
+    
     // Scene setup
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x000000); // Set background to black
-    console.log('Scene created.');
+    scene.background = new THREE.Color(0x000000);
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.set(0, 50, 20); // Move the camera closer to the model
-    console.log('Camera initialized.');
+    camera.position.set(0, 50, 20);
 
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMappingExposure = 1.5; // Increase the exposure
     container.appendChild(renderer.domElement);
-    console.log('Renderer initialized.');
 
     // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
-    console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
-    console.log('Hemisphere light added.');
-
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
-    directionalLight1.position.set(1, 1, 1).normalize();
-    scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
-    directionalLight2.position.set(-1, -1, -1).normalize();
-    scene.add(directionalLight2);
-    console.log('Directional lights added.');
-
-    // Load HDRI environment
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    pmremGenerator.compileEquirectangularShader();
-
-    new THREE.RGBELoader()
-        .setDataType(THREE.UnsignedByteType) // set data type
-        .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
-            const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-            scene.environment = envMap; // Use the HDR for environment lighting only
-            texture.dispose();
-            pmremGenerator.dispose();
-            console.log('Environment map loaded.');
-        });
-
-    // OrbitControls setup
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.screenSpacePanning = false;
-    controls.maxPolarAngle = Math.PI / 2;
-    controls.autoRotate = true; // Enable auto-rotate
-    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
-
-    // Add event listeners to manage auto-rotate
-    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
-    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
-    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
-    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
     // Load model
     const loader = new THREE.GLTFLoader();
     loader.load(
         'assets/model/Buttons2.gltf',
         function(gltf) {
-            console.log('Model loaded successfully.');
             model = gltf.scene;
-            model.position.set(0, 0, 0);
-            model.scale.set(200, 200, 200); // Scale the model up
+            model.scale.set(200, 200, 200);
             scene.add(model);
-            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+            controls.target.set(0, 0, 0);
             controls.update();
-
-            // Increase the envMapIntensity for all materials in the model
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.envMapIntensity = 2; // Increase the intensity
-                }
-            });
-
-            // Rest of the model loading process
-            loadingScreen.style.display = 'none';
-            container.style.display = 'block';
-        },
-        function(xhr) {
-            // Loading progress
-            const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
-            loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
-        },
-        function(error) {
-            console.error('Error loading model:', error);
+            createVideoTexture();  // Create video texture but don't apply it yet
         }
     );
-
-    // Handle window resize
-    window.addEventListener('resize', onWindowResize, false);
 
     // Create audio listener and loader
     listener = new THREE.AudioListener();
@@ -135,20 +52,21 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Untitled.mp4'; // Path to your video file
-    video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
+    video.src = 'assets/Untitled.mp4';  // Path to your video
+    video.setAttribute('playsinline', '');  // For iOS support
     video.load();
 
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
         video.loop = true;
 
+        // Create video texture
         videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Do not immediately apply the texture; wait for button press
+        console.log('Video texture created.');
     });
 
     video.addEventListener('error', (e) => {
@@ -159,21 +77,20 @@ function createVideoTexture() {
 function applyVideoTextureToMesh() {
     const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
     if (Glass2_Glass1_0 && videoTexture) {
-        // Apply the video texture and ensure it fits the object exactly
         Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-
-        // Ensure the video fits the mesh exactly
+        
+        // Calculate the aspect ratio of the video and the mesh
         const meshAspect = Glass2_Glass1_0.geometry.boundingBox.max.x / Glass2_Glass1_0.geometry.boundingBox.max.y;
         const videoAspect = video.videoWidth / video.videoHeight;
 
-        // If aspect ratios differ, scale the texture appropriately
+        // Adjust texture scaling
         if (videoAspect > meshAspect) {
             videoTexture.repeat.set(meshAspect / videoAspect, 1);
         } else {
             videoTexture.repeat.set(1, videoAspect / meshAspect);
         }
 
-        video.play();
+        video.play();  // Play the video
         console.log('Video texture applied and scaled to Glass2_Glass1_0.');
     } else {
         console.error('Glass2_Glass1_0 not found in the model or video texture is unavailable.');
@@ -207,7 +124,12 @@ function setupModelControls() {
     playButton.userData = { action: () => { 
         console.log('Play button pressed.'); 
         playAudio(audioFiles[currentAudioIndex]); 
-        applyVideoTextureToMesh(); // Apply the video texture on play button press
+
+        if (videoTexture) {
+            applyVideoTextureToMesh(); // Apply the video texture on play button press
+        } else {
+            console.error('Video texture is not available.');
+        }
     }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
@@ -239,25 +161,9 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function onUserInteractionStart() {
-    userInteracting = true;
-    controls.autoRotate = false;
-}
-
-function onUserInteractionEnd() {
-    userInteracting = false;
-    controls.autoRotate = true;
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+    controls.update();
     renderer.render(scene, camera);
 }
 
