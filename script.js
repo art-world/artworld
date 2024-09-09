@@ -259,16 +259,19 @@ function scaleAndPositionVideo(mesh) {
     const textureAspect = video.videoWidth / video.videoHeight;
     const meshAspect = width / height;
 
+    // Define a scaling factor for the video size reduction (e.g., 0.7 for 70% size)
+    const scaleFactor = 0.7;  // You can adjust this value to make the video smaller or larger
+
     if (textureAspect > meshAspect) {
         // If the video is wider than the mesh, scale down the width of the video
-        const repeatX = meshAspect / textureAspect;
-        mesh.material.map.repeat.set(repeatX, 1);
-        mesh.material.map.offset.set((1 - repeatX) / 2, 0); // Center the video horizontally
+        const repeatX = scaleFactor * meshAspect / textureAspect;
+        mesh.material.map.repeat.set(repeatX, scaleFactor); // Apply the scale factor to height as well
+        mesh.material.map.offset.set((1 - repeatX) / 2, (1 - scaleFactor) / 2); // Center the video horizontally and vertically
     } else {
         // If the video is taller than the mesh, scale down the height of the video
-        const repeatY = textureAspect / meshAspect;
-        mesh.material.map.repeat.set(1, repeatY);
-        mesh.material.map.offset.set(0, (1 - repeatY) / 2); // Center the video vertically
+        const repeatY = scaleFactor * textureAspect / meshAspect;
+        mesh.material.map.repeat.set(scaleFactor, repeatY); // Apply the scale factor to width as well
+        mesh.material.map.offset.set((1 - scaleFactor) / 2, (1 - repeatY) / 2); // Center the video horizontally and vertically
     }
 }
 
