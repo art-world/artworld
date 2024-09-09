@@ -110,9 +110,6 @@ function init() {
                 }
             });
 
-            // Now that the model is loaded, create the video texture
-            createVideoTexture();
-
             // Rest of the model loading process
             loadingScreen.style.display = 'none';
             container.style.display = 'block';
@@ -144,7 +141,6 @@ function createVideoTexture() {
 
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
-        video.play();
         video.loop = true;
 
         videoTexture = new THREE.VideoTexture(video);
@@ -152,19 +148,36 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-        if (Glass2_Glass1_0) {
-            // Apply the video texture
-            Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            console.log('Video texture applied to Glass2_Glass1_0.');
-        } else {
-            console.error('Glass2_Glass1_0 not found in the model.');
-        }
+        // Do not immediately apply the texture; wait for button press
     });
 
     video.addEventListener('error', (e) => {
         console.error('Error loading video:', e);
     });
+}
+
+function applyVideoTextureToMesh() {
+    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    if (Glass2_Glass1_0 && videoTexture) {
+        // Apply the video texture and ensure it fits the object exactly
+        Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+
+        // Ensure the video fits the mesh exactly
+        const meshAspect = Glass2_Glass1_0.geometry.boundingBox.max.x / Glass2_Glass1_0.geometry.boundingBox.max.y;
+        const videoAspect = video.videoWidth / video.videoHeight;
+
+        // If aspect ratios differ, scale the texture appropriately
+        if (videoAspect > meshAspect) {
+            videoTexture.repeat.set(meshAspect / videoAspect, 1);
+        } else {
+            videoTexture.repeat.set(1, videoAspect / meshAspect);
+        }
+
+        video.play();
+        console.log('Video texture applied and scaled to Glass2_Glass1_0.');
+    } else {
+        console.error('Glass2_Glass1_0 not found in the model or video texture is unavailable.');
+    }
 }
 
 function setupModelControls() {
@@ -190,15 +203,11 @@ function setupModelControls() {
         console.error('One or more buttons or the screen texture are not found on the model.');
         return;
     }
+
     playButton.userData = { action: () => { 
         console.log('Play button pressed.'); 
         playAudio(audioFiles[currentAudioIndex]); 
-        if (videoTexture) {
-            // Set the video texture as the material's map
-            Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-        } else {
-            console.error('Video texture is not available.');
-        }
+        applyVideoTextureToMesh(); // Apply the video texture on play button press
     }};
     pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
