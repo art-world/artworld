@@ -22,6 +22,15 @@ function init() {
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
 
+    // OrbitControls setup
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+
     // Lighting setup
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
@@ -38,11 +47,14 @@ function init() {
             model = gltf.scene;
             model.scale.set(200, 200, 200);
             scene.add(model);
-            controls.target.set(0, 0, 0);
-            controls.update();
+            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+            controls.update();  // Apply the update method after the model loads
             createVideoTexture();  // Create video texture but don't apply it yet
         }
     );
+
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize, false);
 
     // Create audio listener and loader
     listener = new THREE.AudioListener();
@@ -161,9 +173,17 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 function animate() {
     requestAnimationFrame(animate);
-    controls.update();
+    if (controls) {
+        controls.update();  // Ensure controls.update() is called only if controls are defined
+    }
     renderer.render(scene, camera);
 }
 
