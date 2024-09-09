@@ -172,20 +172,18 @@ function setupModelControls() {
     const pauseButton = model.getObjectByName('PauseButton');
     const forwardButton = model.getObjectByName('ForwardButton');
     const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2 = model.getObjectByName('Glass2');
-    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-    console.log("Buttons and Screens:", {
+    console.log("Buttons and Screen:", {
         playButton,
         pauseButton,
         forwardButton,
         backwardButton,
-        glass2,
-        glass2Glass1_0
+        Glass2_Glass1_0
     });
 
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
-        console.error('One or more buttons or the screen textures are not found on the model.');
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !Glass2_Glass1_0) {
+        console.error('One or more buttons or the screen texture are not found on the model.');
         return;
     }
     playButton.userData = { action: () => { 
@@ -193,12 +191,10 @@ function setupModelControls() {
         playAudio(audioFiles[currentAudioIndex]); 
         if (videoTexture) {
             // Set the video texture as the material's map
-            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
             // Make the video 50% smaller and move to the left by 50%
-            scaleAndPositionVideo(glass2);
-            scaleAndPositionVideo(glass2Glass1_0);
+            scaleAndPositionVideo(Glass2_Glass1_0);
         } else {
             console.error('Video texture is not available.');
         }
@@ -234,6 +230,12 @@ function setupModelControls() {
 }
 
 function scaleAndPositionVideo(mesh) {
+    // Check if the mesh is defined and has a geometry
+    if (!mesh || !mesh.geometry) {
+        console.error('Mesh or geometry is not defined.');
+        return;
+    }
+
     // Ensure the mesh's geometry has a bounding box
     if (!mesh.geometry.boundingBox) {
         mesh.geometry.computeBoundingBox();
