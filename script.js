@@ -1,17 +1,12 @@
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
-
-// Create and append loading text
 const loadingText = document.createElement('div');
 loadingText.innerText = 'Use the walkman buttons to play audio...';
 loadingText.style.textAlign = 'center';
 loadingScreen.appendChild(loadingText);
-
-// Create and append loading percentage text
 const loadingPercentage = document.createElement('div');
 loadingScreen.appendChild(loadingPercentage);
-
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/11_WIP_.mp3',
@@ -20,6 +15,7 @@ let audioFiles = [
     'assets/audio/91_WIP_.mp3'
 ];
 let currentAudioIndex = 0;
+let userInteracting = false;
 let video;
 
 init();
@@ -107,6 +103,13 @@ function init() {
             controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
             controls.update();
 
+            // Increase the envMapIntensity for all materials in the model
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.envMapIntensity = 2; // Increase the intensity
+                }
+            });
+
             setupModelControls();
             loadingScreen.style.display = 'none';
             container.style.display = 'block';
@@ -129,27 +132,30 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create video texture but don't play or apply it yet
+    // Create and add video texture
     createVideoTexture();
 }
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Untitled.mov'; // Path to your video file
+    video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
 
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
+        video.play();
+        video.loop = true;
 
         videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Simple approach: scale the texture down
-        videoTexture.repeat.set(0.8, 0.8); // Scale down the video to fit better in the screen
-        videoTexture.offset.set(0.1, 0.1); // Adjust position if needed
+        // Adjust texture to fit perfectly
+        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
+        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
+        videoTexture.repeat.set(1, 1); // Adjust repeat values if necessary
     });
 
     video.addEventListener('error', (e) => {
@@ -162,29 +168,44 @@ function setupModelControls() {
         console.error('Model is not loaded.');
         return;
     }
+    const playButton = model.getObjectByName('PlayButton');
+    const pauseButton = model.getObjectByName('PauseButton');
+    const forwardButton = model.getObjectByName('ForwardButton');
+    const backwardButton = model.getObjectByName('BackwardButton');
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-    // Focus only on Glass2_Glass1_0
-    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+    console.log("Buttons and Screens:", {
+        playButton,
+        pauseButton,
+        forwardButton,
+        backwardButton,
+        glass2,
+        glass2Glass1_0
+    });
 
-    console.log("Screen Object:", Glass2_Glass1_0);
-
-    // Check if object is found
-    if (!Glass2_Glass1_0) {
-        console.error('Glass2_Glass1_0 mesh is not available.');
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
+        console.error('One or more buttons or the screen textures are not found on the model.');
         return;
     }
+    playButton.userData = { action: () => { 
+        console.log('Play button pressed.'); 
+        playAudio(audioFiles[currentAudioIndex]); 
+        if (videoTexture) {
+            // Set the video texture as the material's map
+            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
 
-    // Set up play button to start the video and apply the texture
-    const playButton = model.getObjectByName('PlayButton');
-    if (playButton) {
-        playButton.userData = {
-            action: () => {
-                console.log('Play button pressed.');
-                video.play(); // Start the video
-                applyVideoTextureToMaterial(); // Apply the video texture
-            }
-        };
-    }
+            // Make the video 50% smaller and move to the left by 50%
+            scaleAndPositionVideo(glass2);
+            scaleAndPositionVideo(glass2Glass1_0);
+        } else {
+            console.error('Video texture is not available.');
+        }
+    }};
+    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
+    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
+    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
 
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -212,13 +233,32 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function applyVideoTextureToMaterial() {
-    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-
-    if (Glass2_Glass1_0) {
-        Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-        console.log('Video texture applied to Glass2_Glass1_0');
+function scaleAndPositionVideo(mesh) {
+    // Ensure the mesh's geometry has a bounding box
+    if (!mesh.geometry.boundingBox) {
+        mesh.geometry.computeBoundingBox();
     }
+
+    // Verify bounding box is computed
+    if (!mesh.geometry.boundingBox) {
+        console.error('Bounding box computation failed.');
+        return;
+    }
+
+    const bbox = mesh.geometry.boundingBox;
+    const width = bbox.max.x - bbox.min.x;
+
+    // Scale the mesh down by 50%
+    const scaleX = 0.5;
+    const scaleY = 0.5;
+    mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
+
+    // Adjust the position: move left by 50% of the original width
+    mesh.position.x -= width * scaleX * 0.5; // Move left
+
+    // Ensure the video texture fills the scaled-down mesh
+    mesh.material.map.repeat.set(1 / scaleX, 1 / scaleY);
+    mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
 }
 
 function onUserInteractionStart() {
@@ -235,9 +275,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-    if (videoTexture) {
-        videoTexture.needsUpdate = true;
-    }
 }
 
 function animate() {
