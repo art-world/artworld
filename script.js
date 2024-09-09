@@ -255,24 +255,26 @@ function scaleAndPositionVideo(mesh) {
     const videoAspect = video.videoWidth / video.videoHeight;
     const meshAspect = meshWidth / meshHeight;
 
-    // Calculate repeat and offset values
+    // Scaling factor to reduce the video size further
+    const scaleFactor = 0.5;  // Adjust this value to shrink the video further
+
     let repeatX, repeatY, offsetX, offsetY;
 
     if (videoAspect > meshAspect) {
         // Video is wider than the mesh
-        repeatX = 1;
-        repeatY = meshAspect / videoAspect;
+        repeatX = 1 / scaleFactor;  // Reduce width
+        repeatY = (meshAspect / videoAspect) / scaleFactor;  // Adjust height proportionally
         offsetX = 0;  // No horizontal offset
         offsetY = (1 - repeatY) / 2;  // Center vertically
     } else {
         // Video is taller than the mesh
-        repeatX = videoAspect / meshAspect;
-        repeatY = 1;
+        repeatX = (videoAspect / meshAspect) / scaleFactor;  // Adjust width proportionally
+        repeatY = 1 / scaleFactor;  // Reduce height
         offsetX = (1 - repeatX) / 2;  // Center horizontally
         offsetY = 0;  // No vertical offset
     }
 
-    // Apply repeat and offset values
+    // Apply repeat and offset to fit and center the video
     mesh.material.map.repeat.set(repeatX, repeatY);
     mesh.material.map.offset.set(offsetX, offsetY);
 
