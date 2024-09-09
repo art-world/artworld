@@ -252,7 +252,7 @@ function scaleAndPositionVideo(mesh) {
     const height = bbox.max.y - bbox.min.y;
 
     // Define a scaling factor for reducing the video size
-    const scaleFactor = 0.5;  // Reduces the video size to 50% of the mesh's area
+    const scaleFactor = 0.3;  // Reduces the video size to 50% of the mesh's area
 
     // Set repeat and offset to scale the video down uniformly
     mesh.material.map.repeat.set(1 / scaleFactor, 1 / scaleFactor); // Scale the video to fit inside the mesh
