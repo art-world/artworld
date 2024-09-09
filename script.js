@@ -233,58 +233,6 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function scaleAndPositionVideo(mesh) {
-    // Check if the mesh is defined and has a geometry
-    if (!mesh || !mesh.geometry) {
-        console.error('Mesh or geometry is not defined.');
-        return;
-    }
-
-    // Ensure the mesh's geometry has a bounding box
-    if (!mesh.geometry.boundingBox) {
-        mesh.geometry.computeBoundingBox();
-    }
-
-    // Verify bounding box is computed
-    if (!mesh.geometry.boundingBox) {
-        console.error('Bounding box computation failed.');
-        return;
-    }
-
-    const bbox = mesh.geometry.boundingBox;
-    const meshWidth = bbox.max.x - bbox.min.x;
-    const meshHeight = bbox.max.y - bbox.min.y;
-
-    // Get the aspect ratio of the video and the mesh
-    const videoAspect = video.videoWidth / video.videoHeight;
-    const meshAspect = meshWidth / meshHeight;
-
-    // Scaling factor to reduce the video size further
-    const scaleFactor = 0.2;  // Adjust this value to shrink the video further
-
-    let repeatX, repeatY, offsetX, offsetY;
-
-    if (videoAspect > meshAspect) {
-        // Video is wider than the mesh
-        repeatX = 1 / scaleFactor;  // Reduce width
-        repeatY = (meshAspect / videoAspect) / scaleFactor;  // Adjust height proportionally
-        offsetX = 0;  // No horizontal offset
-        offsetY = (1 - repeatY) / 2;  // Center vertically
-    } else {
-        // Video is taller than the mesh
-        repeatX = (videoAspect / meshAspect) / scaleFactor;  // Adjust width proportionally
-        repeatY = 1 / scaleFactor;  // Reduce height
-        offsetX = (1 - repeatX) / 2;  // Center horizontally
-        offsetY = 0;  // No vertical offset
-    }
-
-    // Apply repeat and offset to fit and center the video
-    mesh.material.map.repeat.set(repeatX, repeatY);
-    mesh.material.map.offset.set(offsetX, offsetY);
-
-    console.log(`Video scaling adjusted: repeatX = ${repeatX}, repeatY = ${repeatY}, offsetX = ${offsetX}, offsetY = ${offsetY}`);
-}
-
 function onUserInteractionStart() {
     userInteracting = true;
     controls.autoRotate = false;
