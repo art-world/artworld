@@ -15,7 +15,8 @@ function init() {
 
     // Camera setup
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
-    camera.position.set(0, 50, 20);
+    camera.position.set(0, 50, 100);  // Adjusted camera position to make sure it's further from the model
+    console.log('Camera initialized at position:', camera.position);
 
     // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -28,16 +29,18 @@ function init() {
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
-    controls.autoRotate = true; // Enable auto-rotate
-    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1.0;
 
-    // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 3);
+    // Lighting setup (increased intensity)
+    const ambientLight = new THREE.AmbientLight(0xffffff, 5);  // Increased intensity for better visibility
     scene.add(ambientLight);
+    console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 3);  // Increased intensity
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
+    console.log('Hemisphere light added.');
 
     // Load model
     const loader = new THREE.GLTFLoader();
@@ -46,10 +49,16 @@ function init() {
         function(gltf) {
             model = gltf.scene;
             model.scale.set(200, 200, 200);
+            model.position.set(0, 0, 0);  // Ensure model is positioned at the origin
             scene.add(model);
-            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-            controls.update();  // Apply the update method after the model loads
+            console.log('Model loaded and added to the scene.');
+            controls.target.set(0, 0, 0);
+            controls.update();
             createVideoTexture();  // Create video texture but don't apply it yet
+        },
+        undefined,
+        function(error) {
+            console.error('Error loading model:', error);
         }
     );
 
@@ -90,7 +99,7 @@ function applyVideoTextureToMesh() {
     const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
     if (Glass2_Glass1_0 && videoTexture) {
         Glass2_Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-        
+
         // Calculate the aspect ratio of the video and the mesh
         const meshAspect = Glass2_Glass1_0.geometry.boundingBox.max.x / Glass2_Glass1_0.geometry.boundingBox.max.y;
         const videoAspect = video.videoWidth / video.videoHeight;
@@ -109,70 +118,6 @@ function applyVideoTextureToMesh() {
     }
 }
 
-function setupModelControls() {
-    if (!model) {
-        console.error('Model is not loaded.');
-        return;
-    }
-    const playButton = model.getObjectByName('PlayButton');
-    const pauseButton = model.getObjectByName('PauseButton');
-    const forwardButton = model.getObjectByName('ForwardButton');
-    const backwardButton = model.getObjectByName('BackwardButton');
-    const Glass2_Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-
-    console.log("Buttons and Screen:", {
-        playButton,
-        pauseButton,
-        forwardButton,
-        backwardButton,
-        Glass2_Glass1_0
-    });
-
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !Glass2_Glass1_0) {
-        console.error('One or more buttons or the screen texture are not found on the model.');
-        return;
-    }
-
-    playButton.userData = { action: () => { 
-        console.log('Play button pressed.'); 
-        playAudio(audioFiles[currentAudioIndex]); 
-
-        if (videoTexture) {
-            applyVideoTextureToMesh(); // Apply the video texture on play button press
-        } else {
-            console.error('Video texture is not available.');
-        }
-    }};
-    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
-    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
-    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        console.log('Mouse down event detected.');
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0) {
-            const object = intersects[0].object;
-            if (object.userData.action) {
-                console.log('Executing action for:', object.name);
-                object.userData.action();
-            } else {
-                console.log('No action found for:', object.name);
-            }
-        } else {
-            console.log('No intersections found.');
-        }
-    }
-
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
-}
-
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
@@ -185,40 +130,4 @@ function animate() {
         controls.update();  // Ensure controls.update() is called only if controls are defined
     }
     renderer.render(scene, camera);
-}
-
-function playAudio(url) {
-    if (!sound) {
-        sound = new THREE.Audio(listener);
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.setLoop(false);
-            sound.setVolume(0.5);
-            sound.play();
-        });
-    } else {
-        if (sound.isPlaying) {
-            sound.stop();
-        }
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.play();
-        });
-    }
-}
-
-function pauseAudio() {
-    if (sound && sound.isPlaying) {
-        sound.pause();
-    }
-}
-
-function nextAudio() {
-    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
-}
-
-function previousAudio() {
-    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
 }
