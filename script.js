@@ -255,23 +255,31 @@ function scaleAndPositionVideo(mesh) {
     const videoAspect = video.videoWidth / video.videoHeight;
     const meshAspect = meshWidth / meshHeight;
 
-    // Set scaleFactor as 1 since we're trying to fit the video exactly
+    // Set a smaller scale factor to fit the video inside the mesh without zooming in
     let repeatX, repeatY, offsetX, offsetY;
+    const scaleFactor = 0.5;  // Reduce this value to zoom out
 
-    // Adjust repeat and offset based on the aspect ratios
+    // Adjust repeat values and offsets based on the aspect ratios
     if (videoAspect > meshAspect) {
         // Video is wider than the mesh, fit based on width
-        repeatX = 1;
-        repeatY = meshAspect / videoAspect;
+        repeatX = 1 / scaleFactor;
+        repeatY = (meshAspect / videoAspect) / scaleFactor;
         offsetX = 0; // No offset horizontally
         offsetY = (1 - repeatY) / 2; // Center vertically
     } else {
-        // Video is taller than or equal to the mesh, fit based on height
-        repeatX = videoAspect / meshAspect;
-        repeatY = 1;
+        // Video is taller than the mesh, fit based on height
+        repeatX = (videoAspect / meshAspect) / scaleFactor;
+        repeatY = 1 / scaleFactor;
         offsetX = (1 - repeatX) / 2; // Center horizontally
         offsetY = 0; // No offset vertically
     }
+
+    // Apply repeat and offset to fit and center the video
+    mesh.material.map.repeat.set(repeatX, repeatY);
+    mesh.material.map.offset.set(offsetX, offsetY);
+
+    console.log(`Video scaling adjusted: repeatX = ${repeatX}, repeatY = ${repeatY}, offsetX = ${offsetX}, offsetY = ${offsetY}`);
+}
 
     // Apply the repeat and offset values to fit and center the video
     mesh.material.map.repeat.set(repeatX, repeatY);
