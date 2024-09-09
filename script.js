@@ -260,7 +260,7 @@ function scaleAndPositionVideo(mesh) {
     const meshAspect = width / height;
 
     // Define a scaling factor for the video size reduction (e.g., 0.7 for 70% size)
-    const scaleFactor = 0.7;  // You can adjust this value to make the video smaller or larger
+    const scaleFactor = 0.1;  // You can adjust this value to make the video smaller or larger
 
     if (textureAspect > meshAspect) {
         // If the video is wider than the mesh, scale down the width of the video
