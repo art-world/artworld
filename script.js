@@ -256,7 +256,7 @@ function scaleAndPositionVideo(mesh) {
     const meshAspect = meshWidth / meshHeight;
 
     // Scaling factor to reduce the video size further
-    const scaleFactor = 0.5;  // Adjust this value to shrink the video further
+    const scaleFactor = 0.2;  // Adjust this value to shrink the video further
 
     let repeatX, repeatY, offsetX, offsetY;
 
