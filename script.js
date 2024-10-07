@@ -238,34 +238,6 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function scaleAndPositionVideo(mesh) {
-    // Ensure the mesh's geometry has a bounding box
-    if (!mesh.geometry.boundingBox) {
-        mesh.geometry.computeBoundingBox();
-    }
-
-    // Verify bounding box is computed
-    if (!mesh.geometry.boundingBox) {
-        console.error('Bounding box computation failed.');
-        return;
-    }
-
-    const bbox = mesh.geometry.boundingBox;
-    const width = bbox.max.x - bbox.min.x;
-
-    // Scale the mesh down by 50%
-    const scaleX = 0.5;
-    const scaleY = 0.5;
-    mesh.scale.set(mesh.scale.x * scaleX, mesh.scale.y * scaleY, mesh.scale.z);
-
-    // Adjust the position: move left by 50% of the original width
-    mesh.position.x -= width * scaleX * 0.5; // Move left
-
-    // Ensure the video texture fills the scaled-down mesh
-    mesh.material.map.repeat.set(1 / scaleX, 1 / scaleY);
-    mesh.material.map.offset.set(0, 0); // Align texture to start from top-left
-}
-
 function onUserInteractionStart() {
     userInteracting = true;
     controls.autoRotate = false;
