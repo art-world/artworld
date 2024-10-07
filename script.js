@@ -127,12 +127,12 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
 
-    // Create audio listener and loader
+    //  audio listener and loader
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create and add video texture
+    //  and add video texture
     createVideoTexture();
 }
 
@@ -152,10 +152,14 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Adjust texture to fit perfectly
-        videoTexture.wrapS = THREE.ClampToEdgeWrapping;
-        videoTexture.wrapT = THREE.ClampToEdgeWrapping;
-        videoTexture.repeat.set(1, 1); // Adjust repeat values if necessary
+        // Flip the video by inverting it on the Y-axis
+        videoTexture.repeat.set(1, -1);  // Flip along the Y-axis
+
+        // Scale the video to 50% of its original size
+        videoTexture.repeat.set(0.5, 0.5);  // Scale down to 50% in both axes
+
+        // Optional: Move the texture to ensure it displays in the desired position
+        videoTexture.offset.set(0.25, 0.25);  // Adjust offset if needed to center it
     });
 
     video.addEventListener('error', (e) => {
