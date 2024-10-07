@@ -93,7 +93,7 @@ function init() {
     // Load model
     const loader = new THREE.GLTFLoader();
     loader.load(
-        'assets/model/Buttons2.gltf',
+        'assets/Walkman buttons screen.gltf',
         function(gltf) {
             console.log('Model loaded successfully.');
             model = gltf.scene;
