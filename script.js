@@ -159,7 +159,7 @@ function createVideoTexture() {
         // Create a matrix that scales the UVs by 50% (or 0.5)
         const uvMatrix = new THREE.Matrix3();
         uvMatrix.set(
-            -2.6, 0, 0.8,   // Scale X 
+            -2.6, 0, 1.8,   // Scale X 
             0, -2.6, 0.15,   // Scale Y 
             0, 0, 1      // No translation or rotation, identity matrix
         );
