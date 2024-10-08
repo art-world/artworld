@@ -153,14 +153,17 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
+        // Flip the video vertically by setting flipY to false (by default, textures are flipped in WebGL)
+        videoTexture.flipY = false;
+
         // Enable manual control over the texture's UV matrix
         videoTexture.matrixAutoUpdate = false;
 
         // Create a matrix that scales the UVs by 50% (or 0.5)
         const uvMatrix = new THREE.Matrix3();
         uvMatrix.set(
-            1.5, 0, 0,   // Scale X by 0.5
-            0, 1.5, 0,   // Scale Y by 0.5
+            1.9, 0, 0,   // Scale X by 0.5
+            0, 1.9, 0,   // Scale Y by 0.5
             0, 0, 1      // No translation or rotation, identity matrix
         );
 
