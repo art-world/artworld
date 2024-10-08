@@ -159,8 +159,8 @@ function createVideoTexture() {
         // Scale the video down by 100% (i.e., reduce its size by half)
         videoTexture.repeat.set(2, 2);  // This halves the size of the texture
 
-        // Optional: Move the texture to ensure it displays correctly (centered)
-        videoTexture.offset.set(0.25, 0.25);  // Adjust if necessary to center it
+        // Move the video texture 100% to the right
+        videoTexture.offset.set(1, 0);  // Offset X by 1 to move it fully to the right
     });
 
     video.addEventListener('error', (e) => {
