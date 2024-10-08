@@ -160,7 +160,7 @@ function createVideoTexture() {
         videoTexture.repeat.set(2, 2);  // This halves the size of the texture
 
         // Move the video texture 100% to the right
-        videoTexture.offset.set(1, 0);  // Offset X by 1 to move it fully to the right
+        videoTexture.offset.set(0, 1);  // Offset X by 1 to move it fully to the right
     });
 
     video.addEventListener('error', (e) => {
