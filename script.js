@@ -153,14 +153,6 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
 
-        // Flip the video vertically by setting flipY to false (by default, textures are flipped in WebGL)
-        videoTexture.flipY = false;  // This will correct the upside-down issue
-
-        // Scale the video down by 100% (i.e., reduce its size by half)
-        videoTexture.repeat.set(2, 2);  // This halves the size of the texture
-
-        // Move the video texture 100% to the right
-        videoTexture.offset.set(0, 3);  // Offset X by 1 to move it fully to the right
     });
 
     video.addEventListener('error', (e) => {
