@@ -156,8 +156,8 @@ function createVideoTexture() {
         // Flip the video vertically by setting flipY to false (by default, textures are flipped in WebGL)
         videoTexture.flipY = false;  // This will correct the upside-down issue
 
-        // Scale the video to 50% of its size
-        videoTexture.repeat.set(1.2, 1.2);  // Scale the video down by 50%
+        // Scale the video down by 100% (i.e., reduce its size by half)
+        videoTexture.repeat.set(2, 2);  // This halves the size of the texture
 
         // Optional: Move the texture to ensure it displays correctly (centered)
         videoTexture.offset.set(0.25, 0.25);  // Adjust if necessary to center it
