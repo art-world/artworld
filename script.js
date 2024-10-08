@@ -157,7 +157,7 @@ function createVideoTexture() {
         videoTexture.flipY = false;  // This will correct the upside-down issue
 
         // Scale the video down by 100% (i.e., reduce its size by half)
-        videoTexture.repeat.set(4, 4);  // This halves the size of the texture
+        videoTexture.repeat.set(2, 2);  // This halves the size of the texture
 
         // Move the video texture 100% to the right
         videoTexture.offset.set(0, 2);  // Offset X by 1 to move it fully to the right
