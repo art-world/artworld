@@ -127,12 +127,12 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
 
-    //  audio listener and loader
+    // Create audio listener and loader
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    //  and add video texture
+    // Create and add video texture
     createVideoTexture();
 }
 
@@ -200,10 +200,6 @@ function setupModelControls() {
             // Set the video texture as the material's map
             glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
             glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-
-            // Make the video 50% smaller and move to the left by 50%
-            scaleAndPositionVideo(glass2);
-            scaleAndPositionVideo(glass2Glass1_0);
         } else {
             console.error('Video texture is not available.');
         }
