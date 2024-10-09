@@ -152,6 +152,10 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+
+        // Scale the video down by 100%
+        videoTexture.repeat.set(0.5, 0.5); // Scale it down by 100%
+        videoTexture.offset.set(0.25, 0.25); // Center the texture on the object
     });
 }
 
