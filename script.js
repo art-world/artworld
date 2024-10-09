@@ -152,24 +152,6 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
-
-        // Enable manual control over the texture's UV matrix
-        videoTexture.matrixAutoUpdate = false;
-
-        // Create a matrix that scales the UVs by 50% (or 0.5)
-        const uvMatrix = new THREE.Matrix3();
-        uvMatrix.set(
-            -2.6, 0, 1.8,   // Scale X 
-            0, -2.6, 0.15,   // Scale Y 
-            0, 0, 1      // No translation or rotation, identity matrix
-        );
-
-        // Apply the UV matrix to the texture
-        videoTexture.matrix.copy(uvMatrix);
-    });
-
-    video.addEventListener('error', (e) => {
-        console.error('Error loading video:', e);
     });
 }
 
