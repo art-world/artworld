@@ -154,8 +154,8 @@ function createVideoTexture() {
         videoTexture.format = THREE.RGBFormat;
 
         // Scale the video down
-        videoTexture.repeat.set(2.7, 2.7); // Scale it down
-        videoTexture.offset.set(-0.39, -0.29); // Center the texture on the object
+        videoTexture.repeat.set(2.9, 2.9); // Scale it down
+        videoTexture.offset.set(-0.45, -0.45); // Center the texture on the object
     });
 }
 
