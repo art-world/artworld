@@ -138,7 +138,7 @@ function init() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Untitled.mp4'; // Path to your video file
+    video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.load();
 
@@ -154,7 +154,7 @@ function createVideoTexture() {
         videoTexture.format = THREE.RGBFormat;
 
         // Scale the video down
-        videoTexture.repeat.set(4, 4); // Scale it down
+        videoTexture.repeat.set(4.1, 4.1); // Scale it down
         videoTexture.offset.set(-1, -1); // Center the texture on the object
     });
 }
