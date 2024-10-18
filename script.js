@@ -155,7 +155,7 @@ function createVideoTexture() {
 
         // Scale the video down
         videoTexture.repeat.set(4.1, 4.1); // Scale it down
-        videoTexture.offset.set(-1.01, -1.05); // Center the texture on the object
+        videoTexture.offset.set(-1.05, -1.05); // Center the texture on the object
     });
 }
 
