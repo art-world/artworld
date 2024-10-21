@@ -1,4 +1,4 @@
-let scene, camera, renderer, model, controls, videoTexture;
+let scene, camera, renderer, model, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -80,6 +80,5 @@ function init() {
 
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
-    renderer.render(scene, camera);
+    renderer.render(scene, camera); // Only render the scene and camera
 }
