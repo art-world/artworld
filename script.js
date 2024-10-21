@@ -18,6 +18,9 @@ let currentAudioIndex = 0;
 let userInteracting = false;
 let video;
 
+// Detect if it's mobile (Safari on iPhone, etc.)
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 // Initialize the loading manager at the top
 const manager = new THREE.LoadingManager();
 
@@ -53,8 +56,8 @@ function init() {
     camera.position.set(0, 50, 20); // Move the camera closer to the model
     console.log('Camera initialized.');
 
-    // Renderer setup
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    // Renderer setup with anti-aliasing disabled for mobile
+    renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
     renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -110,6 +113,9 @@ function init() {
     renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
     renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
+    // Add touch event listeners for iPhone compatibility
+    setupTouchEvents();
+
     // Load model using the manager
     const loader = new THREE.GLTFLoader(manager);
     loader.load('assets/model/Buttons2.gltf', function(gltf) {
@@ -143,27 +149,26 @@ function init() {
     createVideoTexture();
 }
 
-// Create video texture function
+// Touch event listeners for mobile devices
+function setupTouchEvents() {
+    renderer.domElement.addEventListener('touchstart', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('touchmove', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('touchend', onUserInteractionEnd, false);
+}
+
+// Create video texture function with autoplay restriction compliance
 function createVideoTexture() {
     video = document.createElement('video');
     video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
+    video.setAttribute('muted', ''); // Ensures autoplay compliance on mobile
+    video.setAttribute('controls', ''); // Add controls for Safari iPhone
     video.load();
 
+    // Wait for user interaction to start playing video
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
-        video.play();
         video.loop = true;
-
-        // Create the video texture
-        videoTexture = new THREE.VideoTexture(video);
-        videoTexture.minFilter = THREE.LinearFilter;
-        videoTexture.magFilter = THREE.LinearFilter;
-        videoTexture.format = THREE.RGBFormat;
-
-        // Scale the video down
-        videoTexture.repeat.set(4.1, 4.1); // Scale it down
-        videoTexture.offset.set(-1.019, -1.05); // Center the texture on the object
     });
 }
 
