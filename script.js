@@ -90,39 +90,39 @@ function init() {
     renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
     renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
-    // Load model
-    const loader = new THREE.GLTFLoader();
-    loader.load(
-        'assets/model/Buttons2.gltf',
-        function(gltf) {
-            console.log('Model loaded successfully.');
-            model = gltf.scene;
-            model.position.set(0, 0, 0);
-            model.scale.set(200, 200, 200); // Scale the model up
-            scene.add(model);
-            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-            controls.update();
+// Load model
+const loader = new THREE.GLTFLoader();
+loader.load(
+    'assets/model/Buttons2.gltf',
+    function(gltf) {
+        console.log('Model loaded successfully.');
+        model = gltf.scene;
+        model.position.set(0, 0, 0);
+        model.scale.set(200, 200, 200); // Scale the model up
+        scene.add(model);
+        controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+        controls.update();
 
-            // Increase the envMapIntensity for all materials in the model
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    child.material.envMapIntensity = 2; // Increase the intensity
-                }
-            });
+        // Increase the envMapIntensity for all materials in the model
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.material.envMapIntensity = 2; // Increase the intensity
+            }
+        });
 
-            setupModelControls();
-            loadingScreen.style.display = 'none';
-            container.style.display = 'block';
-        },
-        function(xhr) {
-            // Calculate and display percentage
-            const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
-            loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
-        },
-        function (error) {
-            console.error('Error loading model:', error);
-        }
-    );
+        setupModelControls();
+        loadingScreen.style.display = 'none'; // Hide loading screen when complete
+        container.style.display = 'block'; // Show the container once loading is done
+    },
+    function(xhr) {
+        // Calculate and display percentage
+        const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100); // Prevent exceeding 100%
+        loadingPercentage.innerText = `${Math.round(percentComplete)}%`; // Update the percentage text
+    },
+    function (error) {
+        console.error('Error loading model:', error);
+    }
+);
 
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
