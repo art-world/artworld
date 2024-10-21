@@ -9,10 +9,10 @@ const loadingPercentage = document.createElement('div');
 loadingScreen.appendChild(loadingPercentage);
 let audioLoader, listener, sound;
 let audioFiles = [
-    'assets/audio/11_WIP_.mp3',
-    'assets/audio/86_WIP_.mp3',
-    'assets/audio/90 V1_WIP_.mp3',
-    'assets/audio/91_WIP_.mp3'
+    'assets/audio/Arthur Hopewell - 90 - JFM.mp3',
+    'assets/audio/Arthur Hopewell - 11 V1 - JFM.mp3',
+    'assets/audio/Arthur Hopewell - 86 - JFM.mp3',
+    'assets/audio/Arthur Hopewell - 91 - JFM.mp3'
 ];
 let currentAudioIndex = 0;
 let userInteracting = false;
