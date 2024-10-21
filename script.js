@@ -128,7 +128,7 @@ function init() {
             }
         });
 
-        setupModelControls();
+        setupModelControls(); // Setup button actions after the model is loaded
     });
 
     // Handle window resize
@@ -141,6 +141,33 @@ function init() {
 
     // Create and add video texture
     createVideoTexture();
+
+    // Raycaster setup for mouse interaction with the model
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        console.log('Mouse down event detected.');
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.action) {
+                console.log('Executing action for:', object.name);
+                object.userData.action(); // Trigger the action set in userData
+            } else {
+                console.log('No action found for:', object.name);
+            }
+        } else {
+            console.log('No intersections found.');
+        }
+    }
+
+    // Add mouse down event listener for interaction
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Create video texture function
@@ -219,4 +246,40 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
     renderer.render(scene, camera);
+}
+
+function playAudio(url) {
+    if (!sound) {
+        sound = new THREE.Audio(listener);
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    } else {
+        if (sound.isPlaying) {
+            sound.stop();
+        }
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.play();
+        });
+    }
+}
+
+function pauseAudio() {
+    if (sound && sound.isPlaying) {
+        sound.pause();
+    }
+}
+
+function nextAudio() {
+    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
+}
+
+function previousAudio() {
+    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
 }
