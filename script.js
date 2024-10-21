@@ -18,11 +18,32 @@ let currentAudioIndex = 0;
 let userInteracting = false;
 let video;
 
+// Initialize scene
 init();
+
+// Animation loop
 animate();
 
+// Create a loading manager to track the progress of assets being loaded
+const manager = new THREE.LoadingManager();
+
+// This function updates the percentage counter during asset loading
+manager.onProgress = function(url, itemsLoaded, itemsTotal) {
+    const progress = Math.round((itemsLoaded / itemsTotal) * 100);
+    loadingPercentage.innerText = `${progress}%`; // Update the loading percentage text
+};
+
+// Once all assets are loaded, hide the loading screen
+manager.onLoad = function() {
+    console.log('All assets loaded.');
+    loadingScreen.style.display = 'none'; // Hide the loading screen
+    container.style.display = 'block'; // Show the main content container
+};
+
+// Initialize function
 function init() {
     console.log('Initializing scene...');
+    
     // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000); // Set background to black
@@ -90,11 +111,9 @@ function init() {
     renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
     renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
-// Load model
-const loader = new THREE.GLTFLoader();
-loader.load(
-    'assets/model/Buttons2.gltf',
-    function(gltf) {
+    // Load model using the manager
+    const loader = new THREE.GLTFLoader(manager);
+    loader.load('assets/model/Buttons2.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
@@ -111,18 +130,7 @@ loader.load(
         });
 
         setupModelControls();
-        loadingScreen.style.display = 'none'; // Hide loading screen when complete
-        container.style.display = 'block'; // Show the container once loading is done
-    },
-    function(xhr) {
-        // Calculate and display percentage
-        const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100); // Prevent exceeding 100%
-        loadingPercentage.innerText = `${Math.round(percentComplete)}%`; // Update the percentage text
-    },
-    function (error) {
-        console.error('Error loading model:', error);
-    }
-);
+    });
 
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
@@ -136,6 +144,7 @@ loader.load(
     createVideoTexture();
 }
 
+// Create video texture function
 function createVideoTexture() {
     video = document.createElement('video');
     video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
@@ -159,72 +168,36 @@ function createVideoTexture() {
     });
 }
 
+// Setup model controls function (for buttons and interactivity)
 function setupModelControls() {
     if (!model) {
         console.error('Model is not loaded.');
         return;
     }
+    // Add button functionality for play, pause, forward, backward
     const playButton = model.getObjectByName('PlayButton');
     const pauseButton = model.getObjectByName('PauseButton');
     const forwardButton = model.getObjectByName('ForwardButton');
     const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2 = model.getObjectByName('Glass2');
-    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-    console.log("Buttons and Screens:", {
-        playButton,
-        pauseButton,
-        forwardButton,
-        backwardButton,
-        glass2,
-        glass2Glass1_0
-    });
-
-    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
-        console.error('One or more buttons or the screen textures are not found on the model.');
-        return;
+    if (playButton) {
+        playButton.userData = { action: () => { 
+            console.log('Play button pressed.'); 
+            playAudio(audioFiles[currentAudioIndex]); 
+        }};
     }
-    playButton.userData = { action: () => { 
-        console.log('Play button pressed.'); 
-        playAudio(audioFiles[currentAudioIndex]); 
-        if (videoTexture) {
-            // Set the video texture as the material's map
-            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-        } else {
-            console.error('Video texture is not available.');
-        }
-    }};
-    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
-    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
-    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        console.log('Mouse down event detected.');
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0) {
-            const object = intersects[0].object;
-            if (object.userData.action) {
-                console.log('Executing action for:', object.name);
-                object.userData.action();
-            } else {
-                console.log('No action found for:', object.name);
-            }
-        } else {
-            console.log('No intersections found.');
-        }
+    if (pauseButton) {
+        pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); }};
     }
-
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
+    if (forwardButton) {
+        forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); }};
+    }
+    if (backwardButton) {
+        backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); }};
+    }
 }
 
+// Interaction handling functions
 function onUserInteractionStart() {
     userInteracting = true;
     controls.autoRotate = false;
@@ -235,50 +208,16 @@ function onUserInteractionEnd() {
     controls.autoRotate = true;
 }
 
+// Handle window resize
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
+// Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
+    controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
     renderer.render(scene, camera);
-}
-
-function playAudio(url) {
-    if (!sound) {
-        sound = new THREE.Audio(listener);
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.setLoop(false);
-            sound.setVolume(0.5);
-            sound.play();
-        });
-    } else {
-        if (sound.isPlaying) {
-            sound.stop();
-        }
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.play();
-        });
-    }
-}
-
-function pauseAudio() {
-    if (sound && sound.isPlaying) {
-        sound.pause();
-    }
-}
-
-function nextAudio() {
-    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
-}
-
-function previousAudio() {
-    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
 }
