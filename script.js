@@ -159,16 +159,19 @@ function setupTouchEvents() {
 // Create video texture function with autoplay restriction compliance
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
+    video.src = 'assets/Body Scan Short.mp4'; // Ensure this path is correct
     video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
     video.setAttribute('muted', ''); // Ensures autoplay compliance on mobile
     video.setAttribute('controls', ''); // Add controls for Safari iPhone
     video.load();
 
-    // Wait for user interaction to start playing video
     video.addEventListener('loadeddata', () => {
         console.log('Video loaded successfully');
-        video.loop = true;
+        video.loop = true; // Set the loop
+        videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
     });
 }
 
@@ -194,6 +197,7 @@ function setupModelControls() {
         glass2Glass1_0
     });
 
+    // Only set actions for buttons that need them, skip Case_Case1_0
     if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
         console.error('One or more buttons or the screen textures are not found on the model.');
         return;
@@ -242,7 +246,7 @@ function setupModelControls() {
                 console.log('Executing action for:', object.name);
                 object.userData.action(); // Trigger the action set in userData
             } else {
-                console.log('No action found for:', object.name);
+                console.log('No action for this object:', object.name); // Skip objects without actions
             }
         } else {
             console.log('No intersections found.');
