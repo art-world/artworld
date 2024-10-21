@@ -1,15 +1,12 @@
-let scene, camera, renderer, model, videoTexture;
+let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
 loadingText.innerText = 'Use the walkman buttons to play audio...';
 loadingText.style.textAlign = 'center';
 loadingScreen.appendChild(loadingText);
-
 const loadingPercentage = document.createElement('div');
-loadingPercentage.setAttribute('id', 'loadingPercentage'); // Add percentage text element
 loadingScreen.appendChild(loadingPercentage);
-
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/Arthur Hopewell - 90 - JFM.mp3',
@@ -22,11 +19,38 @@ let userInteracting = false;
 let video;
 
 init();
+
 animate();
+
+const manager = new THREE.LoadingManager();
+
+// This function updates the percentage counter
+manager.onProgress = function(url, itemsLoaded, itemsTotal) {
+    const progress = Math.round((itemsLoaded / itemsTotal) * 100);
+    const loadingPercentage = document.getElementById('loadingPercentage');
+    if (loadingPercentage) {
+        loadingPercentage.innerHTML = progress + '%'; // Update the percentage text
+    }
+};
+
+manager.onLoad = function() {
+    console.log('All assets loaded.');
+    const loadingScreen = document.getElementById('loadingScreen');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none'; // Hide the loading screen when everything is loaded
+    }
+};
+
+// Example of using manager for loading a GLTF model
+const loader = new THREE.GLTFLoader(manager);
+loader.load('assets/model/Walkman buttons screen.gltf', function(gltf) {
+    model = gltf.scene;
+    scene.add(model);
+});
+
 
 function init() {
     console.log('Initializing scene...');
-    
     // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000); // Set background to black
@@ -54,31 +78,53 @@ function init() {
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 3); // Additional lighting
     scene.add(hemisphereLight);
     
-    // Add loader logic
-    const manager = new THREE.LoadingManager();
-    
-    // This function updates the percentage counter
-    manager.onProgress = function(url, itemsLoaded, itemsTotal) {
-        const progress = Math.round((itemsLoaded / itemsTotal) * 100);
-        loadingPercentage.innerHTML = progress + '%'; // Update the percentage text
-    };
-
-    manager.onLoad = function() {
-        console.log('All assets loaded.');
-        loadingScreen.style.display = 'none'; // Hide the loading screen when everything is loaded
-    };
-
-    // Loading the models and textures using the manager
-    const loader = new THREE.GLTFLoader(manager);
-    loader.load('assets/model/Walkman buttons screen.gltf', function(gltf) {
-        model = gltf.scene;
-        scene.add(model);
-    });
-
-    // Other scene setup code...
+    // Controls initialization (if needed)
+    controls = new THREE.OrbitControls(camera, renderer.domElement); // If you are using controls
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 0.5; // Set your own rotation speed
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    renderer.render(scene, camera); // Only render the scene and camera
+    if (controls) {
+        controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
+    }
+    renderer.render(scene, camera);
 }
+
+function playAudio(url) {
+    if (!sound) {
+        sound = new THREE.Audio(listener);
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    } else {
+        if (sound.isPlaying) {
+            sound.stop();
+        }
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.play();
+        });
+    }
+}
+
+function pauseAudio() {
+    if (sound && sound.isPlaying) {
+        sound.pause();
+    }
+}
+
+function nextAudio() {
+    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
+}
+
+function previousAudio() {
+    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
+}
+
