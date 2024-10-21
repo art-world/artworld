@@ -202,12 +202,21 @@ function setupModelControls() {
                 // Set the video texture as the material's map
                 glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
                 glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                video.play(); // Play the video when the audio plays
             } else {
                 console.error('Video texture is not available.');
             }
         }
     };
-    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
+    pauseButton.userData = {
+        action: () => {
+            console.log('Pause button pressed.');
+            pauseAudio();
+            if (video) {
+                video.pause(); // Pause the video when the audio pauses
+            }
+        }
+    };
     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
     backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
 
