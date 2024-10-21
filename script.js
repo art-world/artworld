@@ -156,7 +156,7 @@ function setupTouchEvents() {
     renderer.domElement.addEventListener('touchend', onUserInteractionEnd, false);
 }
 
-// Create video texture function with autoplay restriction compliance
+// Create video texture function with proper scaling and positioning
 function createVideoTexture() {
     video = document.createElement('video');
     video.src = 'assets/Body Scan Short.mp4'; // Ensure this path is correct
@@ -172,6 +172,10 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+
+        // Restore original video scaling and placement
+        videoTexture.repeat.set(4.1, 4.1);  // Original scale value
+        videoTexture.offset.set(-1.019, -1.05);  // Original offset value
     });
 }
 
