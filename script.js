@@ -141,33 +141,6 @@ function init() {
 
     // Create and add video texture
     createVideoTexture();
-
-    // Raycaster setup for mouse interaction with the model
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        console.log('Mouse down event detected.');
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0) {
-            const object = intersects[0].object;
-            if (object.userData.action) {
-                console.log('Executing action for:', object.name);
-                object.userData.action(); // Trigger the action set in userData
-            } else {
-                console.log('No action found for:', object.name);
-            }
-        } else {
-            console.log('No intersections found.');
-        }
-    }
-
-    // Add mouse down event listener for interaction
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Create video texture function
@@ -200,27 +173,70 @@ function setupModelControls() {
         console.error('Model is not loaded.');
         return;
     }
-    // Add button functionality for play, pause, forward, backward
     const playButton = model.getObjectByName('PlayButton');
     const pauseButton = model.getObjectByName('PauseButton');
     const forwardButton = model.getObjectByName('ForwardButton');
     const backwardButton = model.getObjectByName('BackwardButton');
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-    if (playButton) {
-        playButton.userData = { action: () => { 
-            console.log('Play button pressed.'); 
-            playAudio(audioFiles[currentAudioIndex]); 
-        }};
+    console.log("Buttons and Screens:", {
+        playButton,
+        pauseButton,
+        forwardButton,
+        backwardButton,
+        glass2,
+        glass2Glass1_0
+    });
+
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
+        console.error('One or more buttons or the screen textures are not found on the model.');
+        return;
     }
-    if (pauseButton) {
-        pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); }};
+
+    playButton.userData = {
+        action: () => {
+            console.log('Play button pressed.');
+            playAudio(audioFiles[currentAudioIndex]);
+            if (videoTexture) {
+                // Set the video texture as the material's map
+                glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            } else {
+                console.error('Video texture is not available.');
+            }
+        }
+    };
+    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
+    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
+    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
+
+    // Raycaster setup for mouse interaction with the model
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        console.log('Mouse down event detected.');
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.action) {
+                console.log('Executing action for:', object.name);
+                object.userData.action(); // Trigger the action set in userData
+            } else {
+                console.log('No action found for:', object.name);
+            }
+        } else {
+            console.log('No intersections found.');
+        }
     }
-    if (forwardButton) {
-        forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); }};
-    }
-    if (backwardButton) {
-        backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); }};
-    }
+
+    // Add mouse down event listener for interaction
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Interaction handling functions
