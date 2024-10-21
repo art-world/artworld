@@ -19,35 +19,7 @@ let userInteracting = false;
 let video;
 
 init();
-
 animate();
-
-const manager = new THREE.LoadingManager();
-
-// This function updates the percentage counter
-manager.onProgress = function(url, itemsLoaded, itemsTotal) {
-    const progress = Math.round((itemsLoaded / itemsTotal) * 100);
-    const loadingPercentage = document.getElementById('loadingPercentage');
-    if (loadingPercentage) {
-        loadingPercentage.innerHTML = progress + '%'; // Update the percentage text
-    }
-};
-
-manager.onLoad = function() {
-    console.log('All assets loaded.');
-    const loadingScreen = document.getElementById('loadingScreen');
-    if (loadingScreen) {
-        loadingScreen.style.display = 'none'; // Hide the loading screen when everything is loaded
-    }
-};
-
-// Example of using manager for loading a GLTF model
-const loader = new THREE.GLTFLoader(manager);
-loader.load('assets/model/Walkman buttons screen.gltf', function(gltf) {
-    model = gltf.scene;
-    scene.add(model);
-});
-
 
 function init() {
     console.log('Initializing scene...');
@@ -75,20 +47,203 @@ function init() {
     scene.add(ambientLight);
     console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 3); // Additional lighting
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
+    hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
-    
-    // Controls initialization (if needed)
-    controls = new THREE.OrbitControls(camera, renderer.domElement); // If you are using controls
+    console.log('Hemisphere light added.');
+
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
+    directionalLight1.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight1);
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
+    directionalLight2.position.set(-1, -1, -1).normalize();
+    scene.add(directionalLight2);
+    console.log('Directional lights added.');
+
+    // Load HDRI environment
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
+
+    new THREE.RGBELoader()
+        .setDataType(THREE.UnsignedByteType) // set data type
+        .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
+            const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+            scene.environment = envMap; // Use the HDR for environment lighting only
+            texture.dispose();
+            pmremGenerator.dispose();
+            console.log('Environment map loaded.');
+        });
+
+    // OrbitControls setup
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+
+    // Add event listeners to manage auto-rotate
+    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
+    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
+
+    // Load model
+    const loader = new THREE.GLTFLoader();
+    loader.load(
+        'assets/model/Buttons2.gltf',
+        function(gltf) {
+            console.log('Model loaded successfully.');
+            model = gltf.scene;
+            model.position.set(0, 0, 0);
+            model.scale.set(200, 200, 200); // Scale the model up
+            scene.add(model);
+            controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+            controls.update();
+
+            // Increase the envMapIntensity for all materials in the model
+            model.traverse((child) => {
+                if (child.isMesh) {
+                    child.material.envMapIntensity = 2; // Increase the intensity
+                }
+            });
+
+            setupModelControls();
+            loadingScreen.style.display = 'none';
+            container.style.display = 'block';
+        },
+        function(xhr) {
+            // Calculate and display percentage
+            const percentComplete = Math.min((xhr.loaded / xhr.total) * 100, 100);
+            loadingPercentage.innerText = `${Math.round(percentComplete)}%`;
+        },
+        function (error) {
+            console.error('Error loading model:', error);
+        }
+    );
+
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize, false);
+
+    // Create audio listener and loader
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+    audioLoader = new THREE.AudioLoader();
+
+    // Create and add video texture
+    createVideoTexture();
+}
+
+function createVideoTexture() {
+    video = document.createElement('video');
+    video.src = 'assets/Body Scan Short.mp4'; // Path to your video file
+    video.setAttribute('playsinline', ''); // Ensures video plays inline on iOS
+    video.load();
+
+    video.addEventListener('loadeddata', () => {
+        console.log('Video loaded successfully');
+        video.play();
+        video.loop = true;
+
+        // Create the video texture
+        videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
+
+        // Scale the video down
+        videoTexture.repeat.set(4.1, 4.1); // Scale it down
+        videoTexture.offset.set(-1.019, -1.05); // Center the texture on the object
+    });
+}
+
+function setupModelControls() {
+    if (!model) {
+        console.error('Model is not loaded.');
+        return;
+    }
+    const playButton = model.getObjectByName('PlayButton');
+    const pauseButton = model.getObjectByName('PauseButton');
+    const forwardButton = model.getObjectByName('ForwardButton');
+    const backwardButton = model.getObjectByName('BackwardButton');
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+
+    console.log("Buttons and Screens:", {
+        playButton,
+        pauseButton,
+        forwardButton,
+        backwardButton,
+        glass2,
+        glass2Glass1_0
+    });
+
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
+        console.error('One or more buttons or the screen textures are not found on the model.');
+        return;
+    }
+    playButton.userData = { action: () => { 
+        console.log('Play button pressed.'); 
+        playAudio(audioFiles[currentAudioIndex]); 
+        if (videoTexture) {
+            // Set the video texture as the material's map
+            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+        } else {
+            console.error('Video texture is not available.');
+        }
+    }};
+    pauseButton.userData = { action: () => { console.log('Pause button pressed.'); pauseAudio(); } };
+    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
+    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        console.log('Mouse down event detected.');
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.action) {
+                console.log('Executing action for:', object.name);
+                object.userData.action();
+            } else {
+                console.log('No action found for:', object.name);
+            }
+        } else {
+            console.log('No intersections found.');
+        }
+    }
+
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
+}
+
+function onUserInteractionStart() {
+    userInteracting = true;
+    controls.autoRotate = false;
+}
+
+function onUserInteractionEnd() {
+    userInteracting = false;
     controls.autoRotate = true;
-    controls.autoRotateSpeed = 0.5; // Set your own rotation speed
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 function animate() {
     requestAnimationFrame(animate);
-    if (controls) {
-        controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
-    }
+    controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
     renderer.render(scene, camera);
 }
 
@@ -127,4 +282,3 @@ function previousAudio() {
     currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
     playAudio(audioFiles[currentAudioIndex]);
 }
-
