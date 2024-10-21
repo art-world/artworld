@@ -18,13 +18,7 @@ let currentAudioIndex = 0;
 let userInteracting = false;
 let video;
 
-// Initialize scene
-init();
-
-// Animation loop
-animate();
-
-// Create a loading manager to track the progress of assets being loaded
+// Initialize the loading manager at the top
 const manager = new THREE.LoadingManager();
 
 // This function updates the percentage counter during asset loading
@@ -40,7 +34,12 @@ manager.onLoad = function() {
     container.style.display = 'block'; // Show the main content container
 };
 
-// Initialize function
+// Initialize scene
+init();
+
+// Animation loop
+animate();
+
 function init() {
     console.log('Initializing scene...');
     
