@@ -57,7 +57,7 @@ function init() {
     console.log('Camera initialized.');
 
     // Renderer setup with anti-aliasing disabled for mobile
-    renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
+    renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -145,8 +145,8 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Create and add video texture
-    createVideoTexture();
+    // // Create and add video texture
+    // createVideoTexture();
 }
 
 // Touch event listeners for mobile devices
