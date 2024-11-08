@@ -1,3 +1,7 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/OrbitControls';
+import { GLTFLoader } from 'three/GLTFLoader';
+import { RGBELoader } from 'three/RGBELoader';
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
@@ -99,7 +103,7 @@ function init() {
     //     });
 
     // OrbitControls setup
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
@@ -117,7 +121,7 @@ function init() {
     // setupTouchEvents();
 
     // Load model using the manager
-    const loader = new THREE.GLTFLoader(manager);
+    const loader = new GLTFLoader(manager);
     loader.load('assets/model/Buttons2.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
