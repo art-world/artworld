@@ -69,15 +69,15 @@ function init() {
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
-    // // Lighting
-    // const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
-    // scene.add(ambientLight);
-    // console.log('Ambient light added.');
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
+    scene.add(ambientLight);
+    console.log('Ambient light added.');
 
-    // const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
-    // hemisphereLight.position.set(0, 200, 0);
-    // scene.add(hemisphereLight);
-    // console.log('Hemisphere light added.');
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
+    hemisphereLight.position.set(0, 200, 0);
+    scene.add(hemisphereLight);
+    console.log('Hemisphere light added.');
 
     const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
     directionalLight1.position.set(1, 1, 1).normalize();
@@ -88,19 +88,19 @@ function init() {
     scene.add(directionalLight2);
     console.log('Directional lights added.');
 
-    // // Load HDRI environment
-    // const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    // pmremGenerator.compileEquirectangularShader();
+    // Load HDRI environment
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    pmremGenerator.compileEquirectangularShader();
 
-    // new THREE.RGBELoader()
-    //     .setDataType(THREE.UnsignedByteType) // set data type
-    //     .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
-    //         const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-    //         scene.environment = envMap; // Use the HDR for environment lighting only
-    //         texture.dispose();
-    //         pmremGenerator.dispose();
-    //         console.log('Environment map loaded.');
-    //     });
+    new THREE.RGBELoader()
+        .setDataType(THREE.UnsignedByteType) // set data type
+        .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
+            const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+            scene.environment = envMap; // Use the HDR for environment lighting only
+            texture.dispose();
+            pmremGenerator.dispose();
+            console.log('Environment map loaded.');
+        });
 
     // OrbitControls setup
     controls = new OrbitControls(camera, renderer.domElement);
@@ -111,14 +111,14 @@ function init() {
     controls.autoRotate = true; // Enable auto-rotate
     controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
-    // // Add event listeners to manage auto-rotate
-    // renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
-    // renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
-    // renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
-    // renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
+    // Add event listeners to manage auto-rotate
+    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
+    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
+    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
-    // // Add touch event listeners for iPhone compatibility
-    // setupTouchEvents();
+    // Add touch event listeners for iPhone compatibility
+    setupTouchEvents();
 
     // Load model using the manager
     const loader = new GLTFLoader(manager);
@@ -128,8 +128,8 @@ function init() {
         model.position.set(0, 0, 0);
         model.scale.set(200, 200, 200); // Scale the model up
         scene.add(model);
-        // controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-        // controls.update();
+        controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+        controls.update();
 
         // Increase the envMapIntensity for all materials in the model
         model.traverse((child) => {
@@ -138,19 +138,19 @@ function init() {
             }
         });
 
-        // setupModelControls(); // Setup button actions after the model is loaded
+        setupModelControls(); // Setup button actions after the model is loaded
     });
 
-    // // Handle window resize
-    // window.addEventListener('resize', onWindowResize, false);
+    // Handle window resize
+    window.addEventListener('resize', onWindowResize, false);
 
-    // // Create audio listener and loader
-    // listener = new THREE.AudioListener();
-    // camera.add(listener);
-    // audioLoader = new THREE.AudioLoader();
+    // Create audio listener and loader
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+    audioLoader = new THREE.AudioLoader();
 
-    // Create and add video texture
-    // createVideoTexture();
+    Create and add video texture
+    createVideoTexture();
 }
 
 // Touch event listeners for mobile devices
@@ -184,86 +184,86 @@ function createVideoTexture() {
 }
 
 // Setup model controls function (for buttons and interactivity)
-// function setupModelControls() {
-//     if (!model) {
-//         console.error('Model is not loaded.');
-//         return;
-//     }
-//     const playButton = model.getObjectByName('PlayButton');
-//     const pauseButton = model.getObjectByName('PauseButton');
-//     const forwardButton = model.getObjectByName('ForwardButton');
-//     const backwardButton = model.getObjectByName('BackwardButton');
-//     const glass2 = model.getObjectByName('Glass2');
-//     const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
+function setupModelControls() {
+    if (!model) {
+        console.error('Model is not loaded.');
+        return;
+    }
+    const playButton = model.getObjectByName('PlayButton');
+    const pauseButton = model.getObjectByName('PauseButton');
+    const forwardButton = model.getObjectByName('ForwardButton');
+    const backwardButton = model.getObjectByName('BackwardButton');
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-//     console.log("Buttons and Screens:", {
-//         playButton,
-//         pauseButton,
-//         forwardButton,
-//         backwardButton,
-//         glass2,
-//         glass2Glass1_0
-//     });
+    console.log("Buttons and Screens:", {
+        playButton,
+        pauseButton,
+        forwardButton,
+        backwardButton,
+        glass2,
+        glass2Glass1_0
+    });
 
-//     // Only set actions for buttons that need them, skip Case_Case1_0
-//     if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
-//         console.error('One or more buttons or the screen textures are not found on the model.');
-//         return;
-//     }
+    // Only set actions for buttons that need them, skip Case_Case1_0
+    if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) {
+        console.error('One or more buttons or the screen textures are not found on the model.');
+        return;
+    }
 
-//     playButton.userData = {
-//         action: () => {
-//             console.log('Play button pressed.');
-//             playAudio(audioFiles[currentAudioIndex]);
-//             if (videoTexture) {
-//                 // Set the video texture as the material's map
-//                 glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-//                 glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-//                 video.play(); // Play the video when the audio plays
-//             } else {
-//                 console.error('Video texture is not available.');
-//             }
-//         }
-//     };
-//     pauseButton.userData = {
-//         action: () => {
-//             console.log('Pause button pressed.');
-//             pauseAudio();
-//             if (video) {
-//                 video.pause(); // Pause the video when the audio pauses
-//             }
-//         }
-//     };
-//     forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
-//     backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
+    playButton.userData = {
+        action: () => {
+            console.log('Play button pressed.');
+            playAudio(audioFiles[currentAudioIndex]);
+            if (videoTexture) {
+                // Set the video texture as the material's map
+                glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                video.play(); // Play the video when the audio plays
+            } else {
+                console.error('Video texture is not available.');
+            }
+        }
+    };
+    pauseButton.userData = {
+        action: () => {
+            console.log('Pause button pressed.');
+            pauseAudio();
+            if (video) {
+                video.pause(); // Pause the video when the audio pauses
+            }
+        }
+    };
+    forwardButton.userData = { action: () => { console.log('Forward button pressed.'); nextAudio(); } };
+    backwardButton.userData = { action: () => { console.log('Backward button pressed.'); previousAudio(); } };
 
-//     // Raycaster setup for mouse interaction with the model
-//     const raycaster = new THREE.Raycaster();
-//     const mouse = new THREE.Vector2();
+    // Raycaster setup for mouse interaction with the model
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
 
-//     function onDocumentMouseDown(event) {
-//         event.preventDefault();
-//         console.log('Mouse down event detected.');
-//         mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-//         mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-//         raycaster.setFromCamera(mouse, camera);
-//         const intersects = raycaster.intersectObjects(model.children, true);
-//         if (intersects.length > 0) {
-//             const object = intersects[0].object;
-//             if (object.userData.action) {
-//                 console.log('Executing action for:', object.name);
-//                 object.userData.action(); // Trigger the action set in userData
-//             } else {
-//                 console.log('No action for this object:', object.name); // Skip objects without actions
-//             }
-//         } else {
-//             console.log('No intersections found.');
-//         }
-//     }
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        console.log('Mouse down event detected.');
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0) {
+            const object = intersects[0].object;
+            if (object.userData.action) {
+                console.log('Executing action for:', object.name);
+                object.userData.action(); // Trigger the action set in userData
+            } else {
+                console.log('No action for this object:', object.name); // Skip objects without actions
+            }
+        } else {
+            console.log('No intersections found.');
+        }
+    }
 
-//     // Add mouse down event listener for interaction
-//     window.addEventListener('mousedown', onDocumentMouseDown, false);
-// }
+    // Add mouse down event listener for interaction
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
+}
 
 // Interaction handling functions
 function onUserInteractionStart() {
@@ -290,38 +290,38 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// function playAudio(url) {
-//     if (!sound) {
-//         sound = new THREE.Audio(listener);
-//         audioLoader.load(url, function(buffer) {
-//             sound.setBuffer(buffer);
-//             sound.setLoop(false);
-//             sound.setVolume(0.5);
-//             sound.play();
-//         });
-//     } else {
-//         if (sound.isPlaying) {
-//             sound.stop();
-//         }
-//         audioLoader.load(url, function(buffer) {
-//             sound.setBuffer(buffer);
-//             sound.play();
-//         });
-//     }
-// }
+function playAudio(url) {
+    if (!sound) {
+        sound = new THREE.Audio(listener);
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(0.5);
+            sound.play();
+        });
+    } else {
+        if (sound.isPlaying) {
+            sound.stop();
+        }
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.play();
+        });
+    }
+}
 
-// function pauseAudio() {
-//     if (sound && sound.isPlaying) {
-//         sound.pause();
-//     }
-// }
+function pauseAudio() {
+    if (sound && sound.isPlaying) {
+        sound.pause();
+    }
+}
 
-// function nextAudio() {
-//     currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
-//     playAudio(audioFiles[currentAudioIndex]);
-// }
+function nextAudio() {
+    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
+}
 
-// function previousAudio() {
-//     currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
-//     playAudio(audioFiles[currentAudioIndex]);
-// }
+function previousAudio() {
+    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
+    playAudio(audioFiles[currentAudioIndex]);
+}
