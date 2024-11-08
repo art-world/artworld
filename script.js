@@ -1,3 +1,7 @@
+import * as THREE from 'three';
+import { OrbitControls } from 'three/OrbitControls';
+import { GLTFLoader } from 'three/GLTFLoader';
+import { RGBELoader } from 'three/RGBELoader';
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
@@ -57,7 +61,7 @@ function init() {
     console.log('Camera initialized.');
 
     // Renderer setup with anti-aliasing disabled for mobile
-    renderer = new THREE.WebGLRenderer({ antialias: !isMobile });
+    renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -88,8 +92,8 @@ function init() {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
-    new THREE.RGBELoader()
-        .setDataType(THREE.UnsignedByteType) // set data type
+    new RGBELoader()
+        .setDataType(THREE.HalfFloatType) // set data type
         .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             scene.environment = envMap; // Use the HDR for environment lighting only
@@ -99,7 +103,7 @@ function init() {
         });
 
     // OrbitControls setup
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
@@ -117,8 +121,8 @@ function init() {
     setupTouchEvents();
 
     // Load model using the manager
-    const loader = new THREE.GLTFLoader(manager);
-    loader.load('assets/model/Buttons2.gltf', function(gltf) {
+    const loader = new GLTFLoader(manager);
+    loader.load('assets/model/model.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
@@ -282,7 +286,7 @@ function onWindowResize() {
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
+    // controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
     renderer.render(scene, camera);
 }
 
