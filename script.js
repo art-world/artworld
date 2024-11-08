@@ -40,8 +40,8 @@ manager.onLoad = function() {
 // Initialize scene
 init();
 
-// // Animation loop
-// animate();
+// Animation loop
+animate();
 
 function init() {
     console.log('Initializing scene...');
@@ -75,14 +75,14 @@ function init() {
     // scene.add(hemisphereLight);
     // console.log('Hemisphere light added.');
 
-    // const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
-    // directionalLight1.position.set(1, 1, 1).normalize();
-    // scene.add(directionalLight1);
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
+    directionalLight1.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight1);
 
-    // const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
-    // directionalLight2.position.set(-1, -1, -1).normalize();
-    // scene.add(directionalLight2);
-    // console.log('Directional lights added.');
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
+    directionalLight2.position.set(-1, -1, -1).normalize();
+    scene.add(directionalLight2);
+    console.log('Directional lights added.');
 
     // // Load HDRI environment
     // const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -98,14 +98,14 @@ function init() {
     //         console.log('Environment map loaded.');
     //     });
 
-    // // OrbitControls setup
-    // controls = new THREE.OrbitControls(camera, renderer.domElement);
-    // controls.enableDamping = true;
-    // controls.dampingFactor = 0.25;
-    // controls.screenSpacePanning = false;
-    // controls.maxPolarAngle = Math.PI / 2;
-    // controls.autoRotate = true; // Enable auto-rotate
-    // controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+    // OrbitControls setup
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.25;
+    controls.screenSpacePanning = false;
+    controls.maxPolarAngle = Math.PI / 2;
+    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
     // // Add event listeners to manage auto-rotate
     // renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
@@ -124,8 +124,8 @@ function init() {
         model.position.set(0, 0, 0);
         model.scale.set(200, 200, 200); // Scale the model up
         scene.add(model);
-        controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
-        controls.update();
+        // controls.target.set(0, 0, 0); // Ensure the controls target the center of the model
+        // controls.update();
 
         // Increase the envMapIntensity for all materials in the model
         model.traverse((child) => {
@@ -145,8 +145,8 @@ function init() {
     // camera.add(listener);
     // audioLoader = new THREE.AudioLoader();
 
-    // // Create and add video texture
-    // createVideoTexture();
+    // Create and add video texture
+    createVideoTexture();
 }
 
 // Touch event listeners for mobile devices
@@ -282,7 +282,7 @@ function onWindowResize() {
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
-    controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
+    // controls.update(); // Only required if controls.enableDamping = true, or if controls.autoRotate = true
     renderer.render(scene, camera);
 }
 
