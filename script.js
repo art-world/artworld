@@ -40,8 +40,8 @@ manager.onLoad = function() {
 // Initialize scene
 init();
 
-// Animation loop
-animate();
+// // Animation loop
+// animate();
 
 function init() {
     console.log('Initializing scene...');
@@ -98,23 +98,23 @@ function init() {
     //         console.log('Environment map loaded.');
     //     });
 
-    // OrbitControls setup
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.screenSpacePanning = false;
-    controls.maxPolarAngle = Math.PI / 2;
-    controls.autoRotate = true; // Enable auto-rotate
-    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
+    // // OrbitControls setup
+    // controls = new THREE.OrbitControls(camera, renderer.domElement);
+    // controls.enableDamping = true;
+    // controls.dampingFactor = 0.25;
+    // controls.screenSpacePanning = false;
+    // controls.maxPolarAngle = Math.PI / 2;
+    // controls.autoRotate = true; // Enable auto-rotate
+    // controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
-    // Add event listeners to manage auto-rotate
-    renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
-    renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
-    renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
-    renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
+    // // Add event listeners to manage auto-rotate
+    // renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
+    // renderer.domElement.addEventListener('mousemove', onUserInteractionStart, false);
+    // renderer.domElement.addEventListener('mouseup', onUserInteractionEnd, false);
+    // renderer.domElement.addEventListener('wheel', onUserInteractionStart, false);
 
-    // Add touch event listeners for iPhone compatibility
-    setupTouchEvents();
+    // // Add touch event listeners for iPhone compatibility
+    // setupTouchEvents();
 
     // Load model using the manager
     const loader = new THREE.GLTFLoader(manager);
@@ -137,13 +137,13 @@ function init() {
         // setupModelControls(); // Setup button actions after the model is loaded
     });
 
-    // Handle window resize
-    window.addEventListener('resize', onWindowResize, false);
+    // // Handle window resize
+    // window.addEventListener('resize', onWindowResize, false);
 
-    // Create audio listener and loader
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    audioLoader = new THREE.AudioLoader();
+    // // Create audio listener and loader
+    // listener = new THREE.AudioListener();
+    // camera.add(listener);
+    // audioLoader = new THREE.AudioLoader();
 
     // // Create and add video texture
     // createVideoTexture();
