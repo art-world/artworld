@@ -122,7 +122,7 @@ function init() {
 
     // Load model using the manager
     const loader = new GLTFLoader(manager);
-    loader.load('assets/model/Buttons2.gltf', function(gltf) {
+    loader.load('assets/model/model.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
