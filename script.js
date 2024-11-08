@@ -92,8 +92,8 @@ function init() {
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
 
-    new THREE.RGBELoader()
-        .setDataType(THREE.UnsignedByteType) // set data type
+    new RGBELoader()
+        .setDataType(THREE.HalfFloatType) // set data type
         .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
             scene.environment = envMap; // Use the HDR for environment lighting only
