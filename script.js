@@ -134,7 +134,7 @@ function init() {
             }
         });
 
-        setupModelControls(); // Setup button actions after the model is loaded
+        // setupModelControls(); // Setup button actions after the model is loaded
     });
 
     // Handle window resize
