@@ -150,7 +150,7 @@ function init() {
     // audioLoader = new THREE.AudioLoader();
 
     // Create and add video texture
-    createVideoTexture();
+    // createVideoTexture();
 }
 
 // Touch event listeners for mobile devices
