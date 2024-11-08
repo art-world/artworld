@@ -65,28 +65,28 @@ function init() {
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
-    scene.add(ambientLight);
-    console.log('Ambient light added.');
+    // // Lighting
+    // const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
+    // scene.add(ambientLight);
+    // console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
-    hemisphereLight.position.set(0, 200, 0);
-    scene.add(hemisphereLight);
-    console.log('Hemisphere light added.');
+    // const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
+    // hemisphereLight.position.set(0, 200, 0);
+    // scene.add(hemisphereLight);
+    // console.log('Hemisphere light added.');
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
-    directionalLight1.position.set(1, 1, 1).normalize();
-    scene.add(directionalLight1);
+    // const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
+    // directionalLight1.position.set(1, 1, 1).normalize();
+    // scene.add(directionalLight1);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
-    directionalLight2.position.set(-1, -1, -1).normalize();
-    scene.add(directionalLight2);
-    console.log('Directional lights added.');
+    // const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
+    // directionalLight2.position.set(-1, -1, -1).normalize();
+    // scene.add(directionalLight2);
+    // console.log('Directional lights added.');
 
-    // Load HDRI environment
-    const pmremGenerator = new THREE.PMREMGenerator(renderer);
-    pmremGenerator.compileEquirectangularShader();
+    // // Load HDRI environment
+    // const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    // pmremGenerator.compileEquirectangularShader();
 
     // new THREE.RGBELoader()
     //     .setDataType(THREE.UnsignedByteType) // set data type
