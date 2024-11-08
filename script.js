@@ -149,7 +149,7 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    Create and add video texture
+    // Create and add video texture
     createVideoTexture();
 }
 
