@@ -107,6 +107,14 @@ function init() {
         scene.add(model);
         controls.target.set(0, 0, 0);
         controls.update();
+
+        // Apply material adjustments
+        model.traverse((child) => {
+            if (child.isMesh) {
+                child.material.envMapIntensity = 2; // Enhance reflective materials
+            }
+        });
+
         setupModelControls();
     });
 
@@ -190,6 +198,10 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+
+        // Restore scaling and placement
+        videoTexture.repeat.set(4.1, 4.1);
+        videoTexture.offset.set(-1.019, -1.05);
     });
 }
 
@@ -201,11 +213,17 @@ function setupModelControls() {
     const pauseButton = model.getObjectByName('PauseButton');
     const forwardButton = model.getObjectByName('ForwardButton');
     const backwardButton = model.getObjectByName('BackwardButton');
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
     playButton.userData = {
         action: () => {
             playAudio(audioFiles[currentAudioIndex]);
-            if (videoTexture) video.play();
+            if (videoTexture) {
+                glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+                video.play();
+            }
         }
     };
     pauseButton.userData = {
