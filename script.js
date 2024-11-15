@@ -133,16 +133,25 @@ function init() {
 
 // Unlock Audio Context for iOS
 function unlockAudioContext() {
-    if (!audioContextUnlocked && listener.context.state === 'suspended') {
+    console.log('Attempting to unlock Audio Context...');
+    if (listener.context.state === 'suspended') {
         listener.context.resume().then(() => {
-            console.log('Audio context unlocked');
+            console.log('Audio context unlocked successfully.');
             audioContextUnlocked = true;
         }).catch(err => console.error('Failed to unlock audio context:', err));
+    } else {
+        console.log('Audio context already unlocked.');
+        audioContextUnlocked = true;
     }
 }
 
 // Play audio function
 function playAudio(url) {
+    if (!audioContextUnlocked) {
+        console.warn('Audio context must be unlocked through user interaction.');
+        return;
+    }
+
     if (isMobile) {
         // Play using HTML5 audio on mobile
         audioElement.src = url;
@@ -160,11 +169,8 @@ function playAudio(url) {
             sound.setBuffer(buffer);
             sound.setLoop(false);
             sound.setVolume(1.0);
-            if (!audioContextUnlocked) {
-                console.log('Audio context must be unlocked through user interaction.');
-                return;
-            }
             sound.play();
+            console.log('Web Audio API playing audio.');
         });
     }
 }
@@ -196,6 +202,8 @@ function setupModelControls() {
         const intersects = raycaster.intersectObjects(model.children, true);
         if (intersects.length > 0 && intersects[0].object.userData.action) {
             intersects[0].object.userData.action();
+        } else {
+            console.log('No interactable object detected.');
         }
     }
 
