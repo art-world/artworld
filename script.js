@@ -61,10 +61,6 @@ function unlockAudioContext(audioContext) {
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 unlockAudioContext(audioContext);
 
-// Create the THREE.js audio listener and attach it to the camera
-listener = new THREE.AudioListener();
-camera.add(listener);
-
 // Initialize scene
 init();
 
