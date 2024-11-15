@@ -3,8 +3,8 @@ import { OrbitControls } from 'three/OrbitControls';
 import { GLTFLoader } from 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
 
-let scene, camera, renderer, model, controls, videoTexture;
-let audioElement; // HTML5 Audio fallback
+let scene, camera, renderer, model, controls, videoTexture, video;
+let audioElement;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -22,12 +22,10 @@ let audioFiles = [
     'assets/audio/Arthur Hopewell - 91 - JFM.mp3'
 ];
 let currentAudioIndex = 0;
-let userInteracting = false;
 
 // Detect if it's mobile (Safari on iPhone, etc.)
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-// Initialize the loading manager
 const manager = new THREE.LoadingManager();
 manager.onProgress = (url, itemsLoaded, itemsTotal) => {
     const progress = Math.round((itemsLoaded / itemsTotal) * 100);
@@ -43,22 +41,18 @@ init();
 animate();
 
 function init() {
-    // Scene setup
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
 
-    // Camera setup
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
     camera.position.set(0, 50, 20);
 
-    // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.toneMappingExposure = 1.5;
     container.appendChild(renderer.domElement);
 
-    // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
 
@@ -74,7 +68,6 @@ function init() {
     directionalLight2.position.set(-1, -1, -1).normalize();
     scene.add(directionalLight2);
 
-    // Load HDRI environment
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
     new RGBELoader()
@@ -86,7 +79,6 @@ function init() {
             pmremGenerator.dispose();
         });
 
-    // OrbitControls setup
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.25;
@@ -94,11 +86,9 @@ function init() {
     controls.autoRotate = true;
     controls.autoRotateSpeed = 1.0;
 
-    // Add event listeners to unlock audio context
     document.addEventListener('click', unlockAudioContext);
     document.addEventListener('touchstart', unlockAudioContext);
 
-    // Load model
     const loader = new GLTFLoader(manager);
     loader.load('assets/model/model.gltf', function(gltf) {
         model = gltf.scene;
@@ -108,7 +98,6 @@ function init() {
         controls.target.set(0, 0, 0);
         controls.update();
 
-        // Apply material adjustments
         model.traverse((child) => {
             if (child.isMesh) {
                 child.material.envMapIntensity = 2;
@@ -118,20 +107,26 @@ function init() {
         setupModelControls();
     });
 
-    // Window resize handling
     window.addEventListener('resize', onWindowResize);
 
-    // Create audio listener and loader
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Setup HTML5 Audio Element Fallback
+    video = document.createElement('video');
+    video.src = 'assets/Body Scan Short.mp4';
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', 'true');
+    video.loop = true;
+    videoTexture = new THREE.VideoTexture(video);
+    videoTexture.minFilter = THREE.LinearFilter;
+    videoTexture.magFilter = THREE.LinearFilter;
+    videoTexture.format = THREE.RGBFormat;
+
     audioElement = document.createElement('audio');
     document.body.appendChild(audioElement);
 }
 
-// Unlock Audio Context for iOS
 function unlockAudioContext() {
     console.log('Attempting to unlock Audio Context...');
     if (listener.context.state === 'suspended') {
@@ -143,9 +138,13 @@ function unlockAudioContext() {
         console.log('Audio context already unlocked.');
         audioContextUnlocked = true;
     }
+
+    // Ensure video playback starts after unlocking
+    video.play().then(() => {
+        console.log('Video playback started.');
+    }).catch(err => console.error('Failed to start video playback:', err));
 }
 
-// Play audio function
 function playAudio(url) {
     if (!audioContextUnlocked) {
         console.warn('Audio context must be unlocked through user interaction.');
@@ -153,7 +152,6 @@ function playAudio(url) {
     }
 
     if (isMobile) {
-        // Play using HTML5 audio on mobile
         audioElement.src = url;
         audioElement.play().then(() => {
             console.log('HTML5 audio playing.');
@@ -161,7 +159,6 @@ function playAudio(url) {
             console.error('HTML5 audio playback failed:', err);
         });
     } else {
-        // Play using Web Audio API on non-mobile
         if (!sound) {
             sound = new THREE.Audio(listener);
         }
@@ -175,49 +172,42 @@ function playAudio(url) {
     }
 }
 
-// Pause audio function
-function pauseAudio() {
-    if (isMobile) {
-        audioElement.pause();
-    } else if (sound && sound.isPlaying) {
-        sound.pause();
-    }
-}
-
-// Model controls setup
 function setupModelControls() {
     const playButton = model.getObjectByName('PlayButton');
     const pauseButton = model.getObjectByName('PauseButton');
-    playButton.userData = { action: () => playAudio(audioFiles[currentAudioIndex]) };
-    pauseButton.userData = { action: pauseAudio };
+    const glass2 = model.getObjectByName('Glass2');
+    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
 
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0 && intersects[0].object.userData.action) {
-            intersects[0].object.userData.action();
-        } else {
-            console.log('No interactable object detected.');
+    playButton.userData = {
+        action: () => {
+            playAudio(audioFiles[currentAudioIndex]);
+            glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
+            video.play().then(() => {
+                console.log('Video resumed.');
+            }).catch(err => console.error('Failed to resume video:', err));
         }
-    }
+    };
 
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
+    pauseButton.userData = {
+        action: () => {
+            if (isMobile) {
+                audioElement.pause();
+            } else if (sound && sound.isPlaying) {
+                sound.pause();
+            }
+            video.pause();
+            console.log('Audio and video paused.');
+        }
+    };
 }
 
-// Resize handling
 function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Animation loop
 function animate() {
     requestAnimationFrame(animate);
     renderer.render(scene, camera);
