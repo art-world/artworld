@@ -72,17 +72,17 @@ function init() {
     camera.position.set(0, 50, 20); // Move the camera closer to the model
     console.log('Camera initialized.');
 
-    // Renderer setup with anti-aliasing disabled for mobile
+    // Renderer setup
     renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMappingExposure = 1.5; // Increase the exposure
+    renderer.toneMappingExposure = 1.5;
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
     // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
+    const ambientLight = new THREE.AmbientLight(0xffffff, 3);
     scene.add(ambientLight);
     console.log('Ambient light added.');
 
@@ -105,10 +105,10 @@ function init() {
     pmremGenerator.compileEquirectangularShader();
 
     new RGBELoader()
-        .setDataType(THREE.HalfFloatType) // set data type
+        .setDataType(THREE.HalfFloatType)
         .load('assets/little_paris_under_tower_1k.hdr', function (texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-            scene.environment = envMap; // Use the HDR for environment lighting only
+            scene.environment = envMap;
             texture.dispose();
             pmremGenerator.dispose();
             console.log('Environment map loaded.');
@@ -120,7 +120,7 @@ function init() {
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
-    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotate = true;
     controls.autoRotateSpeed = 1.0;
 
     // Add event listeners to manage auto-rotate
@@ -140,11 +140,10 @@ function init() {
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
-}
 
     // Load model using the manager
     const loader = new GLTFLoader(manager);
-    loader.load('assets/model/model.gltf', function(gltf) {
+    loader.load('assets/model/model.gltf', function (gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
@@ -166,14 +165,9 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
 
-    // Create audio listener and loader
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    audioLoader = new THREE.AudioLoader();
-
     // Create and add video texture
     createVideoTexture();
-}
+} // <-- Ensure this matches exactly
 
 // Touch event listeners for mobile devices
 function setupTouchEvents() {
