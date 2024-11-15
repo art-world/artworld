@@ -21,8 +21,6 @@ let audioFiles = [
     'assets/audio/Arthur Hopewell - 91 - JFM.mp3'
 ];
 let currentAudioIndex = 0;
-let userInteracting = false;
-let video;
 
 // Detect if it's mobile (Safari on iPhone, etc.)
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -65,14 +63,6 @@ function init() {
     const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
-
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight1.position.set(1, 1, 1).normalize();
-    scene.add(directionalLight1);
-
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
-    directionalLight2.position.set(-1, -1, -1).normalize();
-    scene.add(directionalLight2);
 
     // Load HDRI environment
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
@@ -117,9 +107,6 @@ function init() {
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
-
-    // Video texture setup
-    createVideoTexture();
 }
 
 // Unlock audio context function
@@ -169,71 +156,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// Create video texture
-function createVideoTexture() {
-    video = document.createElement('video');
-    video.src = 'assets/Body Scan Short.mp4';
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('controls', '');
-    video.load();
-
-    video.addEventListener('loadeddata', () => {
-        video.loop = true;
-        videoTexture = new THREE.VideoTexture(video);
-        videoTexture.minFilter = THREE.LinearFilter;
-        videoTexture.magFilter = THREE.LinearFilter;
-        videoTexture.format = THREE.RGBFormat;
-    });
-}
-
-// Model controls setup
-function setupModelControls() {
-    if (!model) return;
-
-    const playButton = model.getObjectByName('PlayButton');
-    const pauseButton = model.getObjectByName('PauseButton');
-    const forwardButton = model.getObjectByName('ForwardButton');
-    const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2 = model.getObjectByName('Glass2');
-    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-
-    playButton.userData = {
-        action: () => {
-            playAudio(audioFiles[currentAudioIndex]);
-            if (videoTexture) {
-                glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                video.play();
-            }
-        }
-    };
-    pauseButton.userData = {
-        action: () => {
-            pauseAudio();
-            video.pause();
-        }
-    };
-    forwardButton.userData = { action: () => nextAudio() };
-    backwardButton.userData = { action: () => previousAudio() };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0 && intersects[0].object.userData.action) {
-            intersects[0].object.userData.action();
-        }
-    }
-
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Animation loop
