@@ -21,6 +21,8 @@ let audioFiles = [
     'assets/audio/Arthur Hopewell - 91 - JFM.mp3'
 ];
 let currentAudioIndex = 0;
+let userInteracting = false;
+let video;
 
 // Detect if it's mobile (Safari on iPhone, etc.)
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -64,6 +66,14 @@ function init() {
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
 
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight1.position.set(1, 1, 1).normalize();
+    scene.add(directionalLight1);
+
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+    directionalLight2.position.set(-1, -1, -1).normalize();
+    scene.add(directionalLight2);
+
     // Load HDRI environment
     const pmremGenerator = new THREE.PMREMGenerator(renderer);
     pmremGenerator.compileEquirectangularShader();
@@ -85,8 +95,8 @@ function init() {
     controls.autoRotateSpeed = 1.0;
 
     // Add event listeners to unlock audio context
-    document.addEventListener('click', unlockAudioContext);
-    document.addEventListener('touchstart', unlockAudioContext);
+    document.addEventListener('click', unlockAudioContext, { once: true });
+    document.addEventListener('touchstart', unlockAudioContext, { once: true });
 
     // Load model
     const loader = new GLTFLoader(manager);
@@ -107,9 +117,12 @@ function init() {
     listener = new THREE.AudioListener();
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
+
+    // Video texture setup
+    createVideoTexture();
 }
 
-// Unlock audio context function
+// Unlock Audio Context for iOS
 function unlockAudioContext() {
     if (!audioContextUnlocked && listener.context.state === 'suspended') {
         listener.context.resume().then(() => {
@@ -119,7 +132,7 @@ function unlockAudioContext() {
     }
 }
 
-// Play audio function
+// Play audio function - Ensures playback works on silent mode
 function playAudio(url) {
     if (!sound) {
         sound = new THREE.Audio(listener);
@@ -128,7 +141,11 @@ function playAudio(url) {
     audioLoader.load(url, function(buffer) {
         sound.setBuffer(buffer);
         sound.setLoop(false);
-        sound.setVolume(0.5);
+        sound.setVolume(1.0); // Set volume to max
+        if (!audioContextUnlocked) {
+            console.log('Audio context must be unlocked through user interaction.');
+            return;
+        }
         sound.play();
     });
 }
@@ -156,6 +173,65 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Create video texture
+function createVideoTexture() {
+    video = document.createElement('video');
+    video.src = 'assets/Body Scan Short.mp4';
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.setAttribute('controls', '');
+    video.load();
+
+    video.addEventListener('loadeddata', () => {
+        video.loop = true;
+        videoTexture = new THREE.VideoTexture(video);
+        videoTexture.minFilter = THREE.LinearFilter;
+        videoTexture.magFilter = THREE.LinearFilter;
+        videoTexture.format = THREE.RGBFormat;
+    });
+}
+
+// Model controls setup
+function setupModelControls() {
+    if (!model) return;
+
+    const playButton = model.getObjectByName('PlayButton');
+    const pauseButton = model.getObjectByName('PauseButton');
+    const forwardButton = model.getObjectByName('ForwardButton');
+    const backwardButton = model.getObjectByName('BackwardButton');
+
+    playButton.userData = {
+        action: () => {
+            playAudio(audioFiles[currentAudioIndex]);
+            if (videoTexture) video.play();
+        }
+    };
+    pauseButton.userData = {
+        action: () => {
+            pauseAudio();
+            video.pause();
+        }
+    };
+    forwardButton.userData = { action: () => nextAudio() };
+    backwardButton.userData = { action: () => previousAudio() };
+
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0 && intersects[0].object.userData.action) {
+            intersects[0].object.userData.action();
+        }
+    }
+
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Animation loop
