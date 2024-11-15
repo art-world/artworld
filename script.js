@@ -23,7 +23,6 @@ let audioFiles = [
 ];
 let currentAudioIndex = 0;
 let userInteracting = false;
-let video;
 
 // Detect if it's mobile (Safari on iPhone, etc.)
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -96,8 +95,8 @@ function init() {
     controls.autoRotateSpeed = 1.0;
 
     // Add event listeners to unlock audio context
-    document.addEventListener('click', unlockAudioContext, { once: true });
-    document.addEventListener('touchstart', unlockAudioContext, { once: true });
+    document.addEventListener('click', unlockAudioContext);
+    document.addEventListener('touchstart', unlockAudioContext);
 
     // Load model
     const loader = new GLTFLoader(manager);
@@ -129,7 +128,6 @@ function init() {
 
     // Setup HTML5 Audio Element Fallback
     audioElement = document.createElement('audio');
-    audioElement.style.display = 'none'; // Keep it hidden
     document.body.appendChild(audioElement);
 }
 
@@ -143,16 +141,18 @@ function unlockAudioContext() {
     }
 }
 
-// Play audio function - Hybrid Web Audio and HTML5 fallback
+// Play audio function
 function playAudio(url) {
     if (isMobile) {
-        // Use HTML5 Audio fallback on mobile
+        // Play using HTML5 audio on mobile
         audioElement.src = url;
         audioElement.play().then(() => {
             console.log('HTML5 audio playing.');
-        }).catch(err => console.error('HTML5 audio playback failed:', err));
+        }).catch((err) => {
+            console.error('HTML5 audio playback failed:', err);
+        });
     } else {
-        // Use Web Audio API for non-mobile
+        // Play using Web Audio API on non-mobile
         if (!sound) {
             sound = new THREE.Audio(listener);
         }
@@ -178,15 +178,28 @@ function pauseAudio() {
     }
 }
 
-// Navigation functions
-function nextAudio() {
-    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
-}
+// Model controls setup
+function setupModelControls() {
+    const playButton = model.getObjectByName('PlayButton');
+    const pauseButton = model.getObjectByName('PauseButton');
+    playButton.userData = { action: () => playAudio(audioFiles[currentAudioIndex]) };
+    pauseButton.userData = { action: pauseAudio };
 
-function previousAudio() {
-    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function onDocumentMouseDown(event) {
+        event.preventDefault();
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(model.children, true);
+        if (intersects.length > 0 && intersects[0].object.userData.action) {
+            intersects[0].object.userData.action();
+        }
+    }
+
+    window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
 // Resize handling
@@ -194,14 +207,6 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
-// Model controls setup
-function setupModelControls() {
-    const playButton = model.getObjectByName('PlayButton');
-    const pauseButton = model.getObjectByName('PauseButton');
-    playButton.userData = { action: () => playAudio(audioFiles[currentAudioIndex]) };
-    pauseButton.userData = { action: pauseAudio };
 }
 
 // Animation loop
