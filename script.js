@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls';
 import { GLTFLoader } from 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
-
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
@@ -12,7 +11,6 @@ loadingText.style.textAlign = 'center';
 loadingScreen.appendChild(loadingText);
 const loadingPercentage = document.createElement('div');
 loadingScreen.appendChild(loadingPercentage);
-
 let audioLoader, listener, sound;
 let audioFiles = [
     'assets/audio/Arthur Hopewell - 90 - JFM.mp3',
@@ -31,33 +29,23 @@ const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 const manager = new THREE.LoadingManager();
 
 // This function updates the percentage counter during asset loading
-manager.onProgress = function (url, itemsLoaded, itemsTotal) {
+manager.onProgress = function(url, itemsLoaded, itemsTotal) {
     const progress = Math.round((itemsLoaded / itemsTotal) * 100);
     loadingPercentage.innerText = `${progress}%`; // Update the loading percentage text
 };
 
 // Once all assets are loaded, hide the loading screen
-manager.onLoad = function () {
+manager.onLoad = function() {
     console.log('All assets loaded.');
     loadingScreen.style.display = 'none'; // Hide the loading screen
     container.style.display = 'block'; // Show the main content container
 };
 
-// Unlock audio context for mobile devices
-function unlockAudioContext(audioContext) {
-    if (audioContext.state !== 'suspended') return;
+// Initialize scene
+init();
 
-    const unlock = () => {
-        audioContext.resume().then(() => {
-            console.log('Audio context unlocked');
-            document.removeEventListener('click', unlock);
-            document.removeEventListener('touchstart', unlock);
-        });
-    };
-
-    document.addEventListener('click', unlock);
-    document.addEventListener('touchstart', unlock);
-}
+// Animation loop
+animate();
 
 function init() {
     console.log('Initializing scene...');
@@ -72,30 +60,30 @@ function init() {
     camera.position.set(0, 50, 20); // Move the camera closer to the model
     console.log('Camera initialized.');
 
-    // Renderer setup
+    // Renderer setup with anti-aliasing disabled for mobile
     renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setClearColor(0x000000); // Set background to black
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.toneMappingExposure = 1.5;
+    renderer.toneMappingExposure = 1.5; // Increase the exposure
     container.appendChild(renderer.domElement);
     console.log('Renderer initialized.');
 
-    // Lighting setup
-    const ambientLight = new THREE.AmbientLight(0xffffff, 3);
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 3); // Increase intensity of ambient light
     scene.add(ambientLight);
     console.log('Ambient light added.');
 
-    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2);
+    const hemisphereLight = new THREE.HemisphereLight(0xffffff, 0x444444, 2); // Increase intensity of hemisphere light
     hemisphereLight.position.set(0, 200, 0);
     scene.add(hemisphereLight);
     console.log('Hemisphere light added.');
 
-    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight1 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 1
     directionalLight1.position.set(1, 1, 1).normalize();
     scene.add(directionalLight1);
 
-    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2);
+    const directionalLight2 = new THREE.DirectionalLight(0xffffff, 2); // Increase intensity of directional light 2
     directionalLight2.position.set(-1, -1, -1).normalize();
     scene.add(directionalLight2);
     console.log('Directional lights added.');
@@ -105,10 +93,10 @@ function init() {
     pmremGenerator.compileEquirectangularShader();
 
     new RGBELoader()
-        .setDataType(THREE.HalfFloatType)
-        .load('assets/little_paris_under_tower_1k.hdr', function (texture) {
+        .setDataType(THREE.HalfFloatType) // set data type
+        .load('assets/little_paris_under_tower_1k.hdr', function(texture) {
             const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-            scene.environment = envMap;
+            scene.environment = envMap; // Use the HDR for environment lighting only
             texture.dispose();
             pmremGenerator.dispose();
             console.log('Environment map loaded.');
@@ -120,8 +108,8 @@ function init() {
     controls.dampingFactor = 0.25;
     controls.screenSpacePanning = false;
     controls.maxPolarAngle = Math.PI / 2;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.0;
+    controls.autoRotate = true; // Enable auto-rotate
+    controls.autoRotateSpeed = 1.0; // Adjust the speed as needed
 
     // Add event listeners to manage auto-rotate
     renderer.domElement.addEventListener('mousedown', onUserInteractionStart, false);
@@ -132,18 +120,9 @@ function init() {
     // Add touch event listeners for iPhone compatibility
     setupTouchEvents();
 
-    // Create and unlock audio context
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    unlockAudioContext(audioContext);
-
-    // Create audio listener and attach it to the camera
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    audioLoader = new THREE.AudioLoader();
-
     // Load model using the manager
     const loader = new GLTFLoader(manager);
-    loader.load('assets/model/model.gltf', function (gltf) {
+    loader.load('assets/model/model.gltf', function(gltf) {
         console.log('Model loaded successfully.');
         model = gltf.scene;
         model.position.set(0, 0, 0);
@@ -165,9 +144,14 @@ function init() {
     // Handle window resize
     window.addEventListener('resize', onWindowResize, false);
 
+    // Create audio listener and loader
+    listener = new THREE.AudioListener();
+    camera.add(listener);
+    audioLoader = new THREE.AudioLoader();
+
     // Create and add video texture
     createVideoTexture();
-} // <-- Ensure this matches exactly
+}
 
 // Touch event listeners for mobile devices
 function setupTouchEvents() {
