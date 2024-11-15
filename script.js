@@ -41,6 +41,30 @@ manager.onLoad = function() {
     container.style.display = 'block'; // Show the main content container
 };
 
+// Unlock audio context for mobile devices
+function unlockAudioContext(audioContext) {
+    if (audioContext.state !== 'suspended') return;
+
+    const unlock = () => {
+        audioContext.resume().then(() => {
+            console.log('Audio context unlocked');
+            document.removeEventListener('click', unlock);
+            document.removeEventListener('touchstart', unlock);
+        });
+    };
+
+    document.addEventListener('click', unlock);
+    document.addEventListener('touchstart', unlock);
+}
+
+// Create and unlock audio context
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+unlockAudioContext(audioContext);
+
+// Create the THREE.js audio listener and attach it to the camera
+listener = new THREE.AudioListener();
+camera.add(listener);
+
 // Initialize scene
 init();
 
