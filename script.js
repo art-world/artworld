@@ -4,6 +4,7 @@ import { GLTFLoader } from 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
 
 let scene, camera, renderer, model, controls, videoTexture;
+let audioElement; // HTML5 Audio fallback
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -111,7 +112,7 @@ function init() {
         // Apply material adjustments
         model.traverse((child) => {
             if (child.isMesh) {
-                child.material.envMapIntensity = 2; // Enhance reflective materials
+                child.material.envMapIntensity = 2;
             }
         });
 
@@ -126,8 +127,10 @@ function init() {
     camera.add(listener);
     audioLoader = new THREE.AudioLoader();
 
-    // Video texture setup
-    createVideoTexture();
+    // Setup HTML5 Audio Element Fallback
+    audioElement = document.createElement('audio');
+    audioElement.style.display = 'none'; // Keep it hidden
+    document.body.appendChild(audioElement);
 }
 
 // Unlock Audio Context for iOS
@@ -140,27 +143,37 @@ function unlockAudioContext() {
     }
 }
 
-// Play audio function - Ensures playback works on silent mode
+// Play audio function - Hybrid Web Audio and HTML5 fallback
 function playAudio(url) {
-    if (!sound) {
-        sound = new THREE.Audio(listener);
-    }
-
-    audioLoader.load(url, function(buffer) {
-        sound.setBuffer(buffer);
-        sound.setLoop(false);
-        sound.setVolume(1.0); // Set volume to max
-        if (!audioContextUnlocked) {
-            console.log('Audio context must be unlocked through user interaction.');
-            return;
+    if (isMobile) {
+        // Use HTML5 Audio fallback on mobile
+        audioElement.src = url;
+        audioElement.play().then(() => {
+            console.log('HTML5 audio playing.');
+        }).catch(err => console.error('HTML5 audio playback failed:', err));
+    } else {
+        // Use Web Audio API for non-mobile
+        if (!sound) {
+            sound = new THREE.Audio(listener);
         }
-        sound.play();
-    });
+        audioLoader.load(url, function(buffer) {
+            sound.setBuffer(buffer);
+            sound.setLoop(false);
+            sound.setVolume(1.0);
+            if (!audioContextUnlocked) {
+                console.log('Audio context must be unlocked through user interaction.');
+                return;
+            }
+            sound.play();
+        });
+    }
 }
 
 // Pause audio function
 function pauseAudio() {
-    if (sound && sound.isPlaying) {
+    if (isMobile) {
+        audioElement.pause();
+    } else if (sound && sound.isPlaying) {
         sound.pause();
     }
 }
@@ -183,73 +196,12 @@ function onWindowResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-// Create video texture
-function createVideoTexture() {
-    video = document.createElement('video');
-    video.src = 'assets/Body Scan Short.mp4';
-    video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
-    video.setAttribute('controls', '');
-    video.load();
-
-    video.addEventListener('loadeddata', () => {
-        video.loop = true;
-        videoTexture = new THREE.VideoTexture(video);
-        videoTexture.minFilter = THREE.LinearFilter;
-        videoTexture.magFilter = THREE.LinearFilter;
-        videoTexture.format = THREE.RGBFormat;
-
-        // Restore scaling and placement
-        videoTexture.repeat.set(4.1, 4.1);
-        videoTexture.offset.set(-1.019, -1.05);
-    });
-}
-
 // Model controls setup
 function setupModelControls() {
-    if (!model) return;
-
     const playButton = model.getObjectByName('PlayButton');
     const pauseButton = model.getObjectByName('PauseButton');
-    const forwardButton = model.getObjectByName('ForwardButton');
-    const backwardButton = model.getObjectByName('BackwardButton');
-    const glass2 = model.getObjectByName('Glass2');
-    const glass2Glass1_0 = model.getObjectByName('Glass2_Glass1_0');
-
-    playButton.userData = {
-        action: () => {
-            playAudio(audioFiles[currentAudioIndex]);
-            if (videoTexture) {
-                glass2.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                glass2Glass1_0.material = new THREE.MeshBasicMaterial({ map: videoTexture });
-                video.play();
-            }
-        }
-    };
-    pauseButton.userData = {
-        action: () => {
-            pauseAudio();
-            video.pause();
-        }
-    };
-    forwardButton.userData = { action: () => nextAudio() };
-    backwardButton.userData = { action: () => previousAudio() };
-
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-
-    function onDocumentMouseDown(event) {
-        event.preventDefault();
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(model.children, true);
-        if (intersects.length > 0 && intersects[0].object.userData.action) {
-            intersects[0].object.userData.action();
-        }
-    }
-
-    window.addEventListener('mousedown', onDocumentMouseDown, false);
+    playButton.userData = { action: () => playAudio(audioFiles[currentAudioIndex]) };
+    pauseButton.userData = { action: pauseAudio };
 }
 
 // Animation loop
