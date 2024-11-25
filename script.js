@@ -179,7 +179,7 @@ function createVideoTexture() {
 
         // Restore original video scaling and placement
         videoTexture.repeat.set(4.1, 4.1);  // Original scale value
-        videoTexture.offset.set(-1.019, -1.05);  // Original offset value
+        videoTexture.offset.set(-1.02, -1.05);  // Original offset value
     });
 }
 
