@@ -154,8 +154,8 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
         videoTexture.encoding = THREE.sRGBEncoding;
-        videoTexture.repeat.set(3.55, 2.0);
-        videoTexture.offset.set(-0.775, -0.5);
+        videoTexture.repeat.set(4.1, 4.1);
+        videoTexture.offset.set(-1.02, -1.05);
     }
 }
 
@@ -190,8 +190,8 @@ function setupModelControls() {
                 glass2.material = basicMaterial;
                 glass2.material.needsUpdate = true;
             }
-            if (glass2Glass1_0) {
-                glass2Glass1_0.visible = false; // Hide to remove visual interference
+            if (glass2Glass1_0 && glass2Glass1_0.material) {
+                glass2Glass1_0.material = basicMaterial;
                 glass2Glass1_0.material.needsUpdate = true;
             }
         }
