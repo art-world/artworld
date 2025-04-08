@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
+import { OrbitControls } from 'three/OrbitControls';
+import { GLTFLoader } from 'three/GLTFLoader';
+import { RGBELoader } from 'three/RGBELoader';
 
 let scene, camera, renderer, model, controls, videoTexture;
 const container = document.getElementById('container');
