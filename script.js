@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls';
-import { GLTFLoader } from ' 'three/GLTFLoader';
+import { GLTFLoader } from 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
 
 let scene, camera, renderer, model, controls, videoTexture;
