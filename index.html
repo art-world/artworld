@@ -1,29 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Model Viewer</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Model Viewer</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="loadingScreen"></div>
-    <div id="container"></div>
+  <div id="loadingScreen"></div>
+  <div id="container"></div>
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-                "three/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js",
-                "three/GLTFLoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js",
-                "three/RGBELoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/RGBELoader.js",
-                "three/DRACOLoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/DRACOLoader.js"
-            }
-        }
-    </script>
+  <!-- Import map for module aliasing -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+        "three/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/controls/OrbitControls.js",
+        "three/GLTFLoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js",
+        "three/RGBELoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/RGBELoader.js",
+        "three/DRACOLoader": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/DRACOLoader.js"
+      }
+    }
+  </script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.1/howler.min.js"></script>
-    <script type="module" src="script.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <!-- HLS.js for streaming the Cloudflare video -->
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <!-- Your main script (must come after import map and hls.js) -->
+  <script type="module" src="script.js"></script>
 </body>
 </html>
