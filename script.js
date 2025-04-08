@@ -111,6 +111,7 @@ function init() {
         });
 
         setupModelControls();
+        createVideoPlaneOverlay();
     });
 
     window.addEventListener('resize', onWindowResize, false);
@@ -154,8 +155,8 @@ function createVideoTexture() {
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
         videoTexture.encoding = THREE.sRGBEncoding;
-        videoTexture.repeat.set(4.1, 4.1);
-        videoTexture.offset.set(-1.02, -1.05);
+        videoTexture.repeat.set(3.55, 2.0);
+        videoTexture.offset.set(-0.775, -0.5);
     }
 }
 
@@ -190,8 +191,8 @@ function setupModelControls() {
                 glass2.material = basicMaterial;
                 glass2.material.needsUpdate = true;
             }
-            if (glass2Glass1_0 && glass2Glass1_0.material) {
-                glass2Glass1_0.material = basicMaterial;
+            if (glass2Glass1_0) {
+                glass2Glass1_0.visible = false; // Hide to remove visual interference
                 glass2Glass1_0.material.needsUpdate = true;
             }
         }
@@ -252,6 +253,32 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+function createVideoPlaneOverlay() {
+    if (!videoTexture || !model) return;
+
+    const glass2 = model.getObjectByName('Glass2');
+    if (!glass2) {
+        console.warn('Glass2 not found');
+        return;
+    }
+
+    const screenPosition = new THREE.Vector3();
+    const screenQuaternion = new THREE.Quaternion();
+    glass2.getWorldPosition(screenPosition);
+    glass2.getWorldQuaternion(screenQuaternion);
+
+    const videoGeometry = new THREE.PlaneGeometry(16, 9);
+    const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
+    const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
+
+    videoPlane.position.copy(screenPosition);
+    videoPlane.quaternion.copy(screenQuaternion);
+    videoPlane.scale.multiplyScalar(5); // tweak this as needed
+    videoPlane.translateZ(0.1); // push slightly forward to avoid overlap
+
+    scene.add(videoPlane);
 }
 
 function animate() {
