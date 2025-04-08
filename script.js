@@ -13,15 +13,6 @@ loadingScreen.appendChild(loadingText);
 const loadingPercentage = document.createElement('div');
 loadingScreen.appendChild(loadingPercentage);
 
-let audioLoader, listener, sound;
-let audioFiles = [
-    'assets/audio/Arthur Hopewell - 90 - JFM.mp3',
-    'assets/audio/Arthur Hopewell - 11 V1 - JFM.mp3',
-    'assets/audio/Arthur Hopewell - 86 - JFM.mp3',
-    'assets/audio/Arthur Hopewell - 91 - JFM.mp3'
-];
-let currentAudioIndex = 0;
-let userInteracting = false;
 let video;
 
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -43,7 +34,6 @@ animate();
 function init() {
     console.log('Initializing scene...');
 
-    // Resume audio context on first touch for iOS Safari
     document.body.addEventListener('touchstart', () => {
         if (THREE.AudioContext.getContext().state === 'suspended') {
             THREE.AudioContext.getContext().resume().then(() => {
@@ -125,10 +115,6 @@ function init() {
 
     window.addEventListener('resize', onWindowResize, false);
 
-    listener = new THREE.AudioListener();
-    camera.add(listener);
-    audioLoader = new THREE.AudioLoader();
-
     createVideoTexture();
 }
 
@@ -140,7 +126,7 @@ function setupTouchEvents() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/Body Scan Short.mp4';
+    video.src = 'assets/video/artworld-alpina.mp4';
     video.setAttribute('playsinline', '');
     video.setAttribute('muted', '');
     video.setAttribute('controls', '');
@@ -170,33 +156,46 @@ function setupModelControls() {
     if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) return;
 
     playButton.userData = {
-        action: () => {
+        action: async () => {
             console.log('Play button pressed.');
-            if (listener.context.state === 'suspended') {
-                listener.context.resume().then(() => {
-                    playAudio(audioFiles[currentAudioIndex]);
-                });
-            } else {
-                playAudio(audioFiles[currentAudioIndex]);
+            try {
+                await video.play();
+                console.log('Video started');
+            } catch (err) {
+                console.error('Video play failed:', err);
             }
-            if (videoTexture) {
+
+            if (glass2 && glass2.material) {
                 glass2.material.map = videoTexture;
                 glass2.material.needsUpdate = true;
+            }
+            if (glass2Glass1_0 && glass2Glass1_0.material) {
                 glass2Glass1_0.material.map = videoTexture;
                 glass2Glass1_0.material.needsUpdate = true;
-                video.play();
             }
         }
     };
+
     pauseButton.userData = {
         action: () => {
             console.log('Pause button pressed.');
-            pauseAudio();
             if (video) video.pause();
         }
     };
-    forwardButton.userData = { action: () => { nextAudio(); } };
-    backwardButton.userData = { action: () => { previousAudio(); } };
+
+    forwardButton.userData = {
+        action: () => {
+            console.log('Forward button pressed.');
+            video.currentTime = Math.min(video.duration, video.currentTime + 10);
+        }
+    };
+
+    backwardButton.userData = {
+        action: () => {
+            console.log('Backward button pressed.');
+            video.currentTime = Math.max(0, video.currentTime - 10);
+        }
+    };
 
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
@@ -238,40 +237,4 @@ function animate() {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
-}
-
-function playAudio(url) {
-    if (!sound) {
-        sound = new THREE.Audio(listener);
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.setLoop(false);
-            sound.setVolume(0.5);
-            sound.play();
-        });
-    } else {
-        if (sound.isPlaying) {
-            sound.stop();
-        }
-        audioLoader.load(url, function(buffer) {
-            sound.setBuffer(buffer);
-            sound.play();
-        });
-    }
-}
-
-function pauseAudio() {
-    if (sound && sound.isPlaying) {
-        sound.pause();
-    }
-}
-
-function nextAudio() {
-    currentAudioIndex = (currentAudioIndex + 1) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
-}
-
-function previousAudio() {
-    currentAudioIndex = (currentAudioIndex - 1 + audioFiles.length) % audioFiles.length;
-    playAudio(audioFiles[currentAudioIndex]);
 }
