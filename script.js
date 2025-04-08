@@ -128,7 +128,6 @@ function createVideoTexture() {
     video = document.createElement('video');
     video.setAttribute('playsinline', '');
     video.setAttribute('controls', '');
-    // video.muted = true; <-- removed to allow audio to play
     video.crossOrigin = 'anonymous';
     video.loop = true;
 
@@ -154,6 +153,7 @@ function createVideoTexture() {
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
+        videoTexture.encoding = THREE.sRGBEncoding;
         videoTexture.repeat.set(4.1, 4.1);
         videoTexture.offset.set(-1.02, -1.05);
     }
@@ -184,12 +184,13 @@ function setupModelControls() {
                 console.log('Video error state:', video.error);
             }
 
+            const basicMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
             if (glass2 && glass2.material) {
-                glass2.material.map = videoTexture;
+                glass2.material = basicMaterial;
                 glass2.material.needsUpdate = true;
             }
             if (glass2Glass1_0 && glass2Glass1_0.material) {
-                glass2Glass1_0.material.map = videoTexture;
+                glass2Glass1_0.material = basicMaterial;
                 glass2Glass1_0.material.needsUpdate = true;
             }
         }
