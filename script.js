@@ -173,6 +173,7 @@ function setupModelControls() {
 
     playButton.userData = {
         action: async () => {
+            controls.autoRotate = false;
             console.log('Play button pressed.');
             try {
                 await video.play();
