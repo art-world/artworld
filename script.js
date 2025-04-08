@@ -273,12 +273,12 @@ function createVideoPlaneOverlay() {
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
 
-    videoPlane.position.copy(screenPosition);
-    videoPlane.quaternion.copy(screenQuaternion);
+    videoPlane.position.copy(glass2.position);
+    videoPlane.quaternion.copy(glass2.quaternion);
     videoPlane.scale.multiplyScalar(5); // tweak this as needed
     videoPlane.translateZ(0.1); // push slightly forward to avoid overlap
 
-    scene.add(videoPlane);
+    glass2.parent.add(videoPlane);
 }
 
 function animate() {
