@@ -128,22 +128,36 @@ function createVideoTexture() {
     video = document.createElement('video');
     video.setAttribute('playsinline', '');
     video.setAttribute('controls', '');
+    video.muted = true; // ✅ Required for Safari to allow autoplay on user interaction
     video.crossOrigin = 'anonymous';
+    video.loop = true;
 
-    const hls = new Hls();
     const hlsUrl = 'https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8';
 
-    hls.loadSource(hlsUrl);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function () {
-        video.loop = true;
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        // Safari/iOS support
+        video.src = hlsUrl;
+        video.load();
+        setupVideoTexture();
+    } else if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(hlsUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+            setupVideoTexture();
+        });
+    } else {
+        console.error('HLS not supported in this browser');
+    }
+
+    function setupVideoTexture() {
         videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
         videoTexture.magFilter = THREE.LinearFilter;
         videoTexture.format = THREE.RGBFormat;
         videoTexture.repeat.set(4.1, 4.1);
         videoTexture.offset.set(-1.02, -1.05);
-    });
+    }
 }
 
 function setupModelControls() {
@@ -166,6 +180,7 @@ function setupModelControls() {
                 console.log('Video started');
             } catch (err) {
                 console.error('Video play failed:', err);
+                console.log('Video error state:', video.error);
             }
 
             if (glass2 && glass2.material) {
