@@ -128,14 +128,13 @@ function createVideoTexture() {
     video = document.createElement('video');
     video.setAttribute('playsinline', '');
     video.setAttribute('controls', '');
-    video.muted = true; // ✅ Required for Safari to allow autoplay on user interaction
+    // video.muted = true; <-- removed to allow audio to play
     video.crossOrigin = 'anonymous';
     video.loop = true;
 
     const hlsUrl = 'https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8';
 
     if (video.canPlayType('application/vnd.apple.mpegurl')) {
-        // Safari/iOS support
         video.src = hlsUrl;
         video.load();
         setupVideoTexture();
@@ -177,6 +176,8 @@ function setupModelControls() {
             console.log('Play button pressed.');
             try {
                 await video.play();
+                video.muted = false;
+                video.volume = 1;
                 console.log('Video started');
             } catch (err) {
                 console.error('Video play failed:', err);
