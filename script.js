@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls';
-import { GLTFLoader } from 'three/GLTFLoader';
+import { GLTFLoader } from ' 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
 
 let scene, camera, renderer, model, controls, videoTexture;
@@ -126,13 +126,16 @@ function setupTouchEvents() {
 
 function createVideoTexture() {
     video = document.createElement('video');
-    video.src = 'assets/video/artworld-alpina.mp4';
     video.setAttribute('playsinline', '');
-    video.setAttribute('muted', '');
     video.setAttribute('controls', '');
-    video.load();
+    video.crossOrigin = 'anonymous';
 
-    video.addEventListener('loadeddata', () => {
+    const hls = new Hls();
+    const hlsUrl = 'https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8';
+
+    hls.loadSource(hlsUrl);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED, function () {
         video.loop = true;
         videoTexture = new THREE.VideoTexture(video);
         videoTexture.minFilter = THREE.LinearFilter;
