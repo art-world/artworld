@@ -269,14 +269,14 @@ function createVideoPlaneOverlay() {
     glass2.getWorldPosition(screenPosition);
     glass2.getWorldQuaternion(screenQuaternion);
 
-    const videoGeometry = new THREE.PlaneGeometry(16, 9);
+    const videoGeometry = new THREE.PlaneGeometry(1.6, 0.9);
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
 
     videoPlane.position.copy(glass2.position);
     videoPlane.quaternion.copy(glass2.quaternion);
-    videoPlane.scale.multiplyScalar(5); // tweak this as needed
-    videoPlane.translateZ(0.1); // push slightly forward to avoid overlap
+    // tweak this as needed
+    videoPlane.position.z += 0.01; // push slightly forward to avoid overlap
 
     glass2.parent.add(videoPlane);
 }
