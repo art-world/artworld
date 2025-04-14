@@ -279,4 +279,4 @@ function createVideoPlaneOverlay() {
     videoPlane.rotation.y = 0;
     videoPlane.rotation.x = 0;
     videoPlane.rotation.y = 0;
-    videoPlane.rotation.set(Math.PI / 2, 0, 0); // Rotate 90 degrees to face forward
+    videoPlane.rotation.set(0, Math.PI / 2, 0); // Rotate 90 degrees on Y-axis to face the correct direction
