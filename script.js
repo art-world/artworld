@@ -272,19 +272,23 @@ function createVideoPlaneOverlay() {
         return;
     }
 
-    const screenPosition = new THREE.Vector3();
-    const screenQuaternion = new THREE.Quaternion();
-    glass2.getWorldPosition(screenPosition);
-    glass2.getWorldQuaternion(screenQuaternion);
+    const screenWorldPosition = new THREE.Vector3();
+    const screenWorldQuaternion = new THREE.Quaternion();
+    glass2.getWorldPosition(screenWorldPosition);
+    glass2.getWorldQuaternion(screenWorldQuaternion);
+
+    const parent = glass2.parent;
+    const localPosition = new THREE.Vector3();
+    parent.worldToLocal(localPosition.copy(screenWorldPosition));
 
     const videoGeometry = new THREE.PlaneGeometry(1.6, 0.9);
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
 
-    videoPlane.position.copy(screenPosition);
-    videoPlane.quaternion.copy(screenQuaternion);
+    videoPlane.position.copy(localPosition);
+    videoPlane.quaternion.copy(screenWorldQuaternion);
     videoPlane.scale.set(2.2, 1.3, 1);
     videoPlane.rotateY(Math.PI);
 
-    glass2.parent.add(videoPlane);
+    parent.add(videoPlane);
 }
