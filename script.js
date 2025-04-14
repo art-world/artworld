@@ -31,6 +31,8 @@ manager.onLoad = function() {
 };
 
 init();
+window.init = init;
+window.animate = animate;
 
 function animate() {
     requestAnimationFrame(animate);
