@@ -1,9 +1,11 @@
+// Updated Walkman interactive scene with full setup from repository and bug fixes
 import * as THREE from 'three';
 import { OrbitControls } from 'three/OrbitControls';
 import { GLTFLoader } from 'three/GLTFLoader';
 import { RGBELoader } from 'three/RGBELoader';
 
 let scene, camera, renderer, model, controls, videoTexture;
+let userInteracting = false;
 const container = document.getElementById('container');
 const loadingScreen = document.getElementById('loadingScreen');
 const loadingText = document.createElement('div');
@@ -29,7 +31,12 @@ manager.onLoad = function() {
 };
 
 init();
-animate();
+
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    renderer.render(scene, camera);
+}
 
 function init() {
     console.log('Initializing scene...');
@@ -117,6 +124,7 @@ function init() {
     window.addEventListener('resize', onWindowResize, false);
 
     createVideoTexture();
+    animate();
 }
 
 function setupTouchEvents() {
@@ -160,6 +168,22 @@ function createVideoTexture() {
     }
 }
 
+function onUserInteractionStart() {
+    userInteracting = true;
+    controls.autoRotate = false;
+}
+
+function onUserInteractionEnd() {
+    userInteracting = false;
+    controls.autoRotate = true;
+}
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
 function setupModelControls() {
     if (!model) return;
 
@@ -192,7 +216,7 @@ function setupModelControls() {
                 glass2.material.needsUpdate = true;
             }
             if (glass2Glass1_0) {
-                glass2Glass1_0.visible = false; // Hide to remove visual interference
+                glass2Glass1_0.visible = false;
                 glass2Glass1_0.material.needsUpdate = true;
             }
         }
@@ -239,22 +263,6 @@ function setupModelControls() {
     window.addEventListener('mousedown', onDocumentMouseDown, false);
 }
 
-function onUserInteractionStart() {
-    userInteracting = true;
-    controls.autoRotate = false;
-}
-
-function onUserInteractionEnd() {
-    userInteracting = false;
-    controls.autoRotate = true;
-}
-
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-
 function createVideoPlaneOverlay() {
     if (!videoTexture || !model) return;
 
@@ -275,13 +283,8 @@ function createVideoPlaneOverlay() {
 
     videoPlane.position.copy(screenPosition);
     videoPlane.quaternion.copy(screenQuaternion);
-
-    // Adjust size
     videoPlane.scale.set(2.2, 1.3, 1);
-
-    // Flip the video 180° around Y axis if needed
-    videoPlane.rotateY(Math.PI); // Optional: flip left-right
-    // videoPlane.rotateX(Math.PI); // Optional: flip upside-down
+    videoPlane.rotateY(Math.PI);
 
     glass2.parent.add(videoPlane);
 }
