@@ -280,3 +280,4 @@ function createVideoPlaneOverlay() {
 
     glass2.parent.add(videoPlane);
 }
+}
