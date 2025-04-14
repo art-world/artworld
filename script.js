@@ -279,14 +279,4 @@ function createVideoPlaneOverlay() {
     videoPlane.rotation.y = 0;
     videoPlane.rotation.x = 0;
     videoPlane.rotation.y = 0;
-    videoPlane.rotation.z = Math.PI; // flip on Z-axis instead // flip horizontally (adjust axis if needed)
-    videoPlane.position.z += 0.01; // push slightly forward to avoid overlap
-
-    glass2.parent.add(videoPlane);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    renderer.render(scene, camera);
-}
+    videoPlane.rotation.set(Math.PI / 2, 0, 0); // Rotate 90 degrees to face forward
