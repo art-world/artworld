@@ -273,11 +273,15 @@ function createVideoPlaneOverlay() {
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
 
-    videoPlane.position.copy(glass2.position);
-    videoPlane.quaternion.copy(glass2.quaternion);
+    videoPlane.position.copy(screenPosition);
+    videoPlane.quaternion.copy(screenQuaternion);
+
+    // Adjust size
     videoPlane.scale.set(2.2, 1.3, 1);
-    videoPlane.rotation.set(0, 0, 0); // Reset for now
+
+    // Flip the video 180° around Y axis if needed
+    videoPlane.rotateY(Math.PI); // Optional: flip left-right
+    // videoPlane.rotateX(Math.PI); // Optional: flip upside-down
 
     glass2.parent.add(videoPlane);
-}
 }
