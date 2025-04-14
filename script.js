@@ -287,7 +287,7 @@ function createVideoPlaneOverlay() {
     const videoMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
     const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
 
-    videoPlane.position.copy(localPosition).add(new THREE.Vector3(0.05, 0.12, -0.15)); // nudged slightly up
+    videoPlane.position.copy(localPosition).add(new THREE.Vector3(0.05, 0.14, -0.15)); // tiny Y adjustment // nudged slightly up
     videoPlane.quaternion.copy(screenWorldQuaternion);
     videoPlane.scale.set(2.2, 1.3, 1);
     videoPlane.rotateY(Math.PI);
