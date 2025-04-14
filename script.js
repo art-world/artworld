@@ -275,8 +275,8 @@ function createVideoPlaneOverlay() {
 
     videoPlane.position.copy(glass2.position);
     videoPlane.quaternion.copy(glass2.quaternion);
-    videoPlane.scale.set(2.2, 1.3, 1); // increase size of video plane
-    videoPlane.rotation.y = 0;
-    videoPlane.rotation.x = 0;
-    videoPlane.rotation.y = 0;
-    videoPlane.rotation.set(0, Math.PI / 2, 0); // Rotate 90 degrees on Y-axis to face the correct direction
+    videoPlane.scale.set(2.2, 1.3, 1);
+    videoPlane.rotation.set(0, 0, 0); // Reset for now
+
+    glass2.parent.add(videoPlane);
+}
