@@ -4,7 +4,7 @@ import { OrbitControls } from "three/OrbitControls";
 import { GLTFLoader } from "three/GLTFLoader";
 import { RGBELoader } from "three/RGBELoader";
 
-let scene, camera, renderer, model, controls, videoTexture;
+let scene, camera, renderer, model, controls, videoTexture, videoPlane;
 let userInteracting = false;
 const container = document.getElementById("container");
 const loadingScreen = document.getElementById("loadingScreen");
@@ -140,7 +140,7 @@ function init() {
     });
 
     setupModelControls();
-    createVideoPlaneOverlay();
+    if (videoTexture) createVideoPlaneOverlay(); // now only runs when both model and video are ready
   });
 
   window.addEventListener("resize", onWindowResize, false);
@@ -177,18 +177,21 @@ function createVideoTexture() {
     video.src = hlsUrl;
     video.load();
     setupVideoTexture();
+    // createVideoPlaneOverlay() will be triggered from model loader if videoTexture is ready
   } else if (Hls.isSupported()) {
     const hls = new Hls();
     hls.loadSource(hlsUrl);
     hls.attachMedia(video);
     hls.on(Hls.Events.MANIFEST_PARSED, function () {
       setupVideoTexture();
+      createVideoPlaneOverlay();
     });
   } else {
     console.error("HLS not supported in this browser");
   }
 
   function setupVideoTexture() {
+    console.log("✅ Video texture created");
     videoTexture = new THREE.VideoTexture(video);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
@@ -244,19 +247,22 @@ function setupModelControls() {
         video.muted = false;
         video.volume = 1;
         console.log("Video started");
+        const waitForPlane = setInterval(() => {
+          if (videoPlane) {
+            console.log("👁️ Setting videoPlane.visible = true");
+            videoPlane.visible = true;
+            clearInterval(waitForPlane);
+          }
+        }, 100);
       } catch (err) {
         console.error("Video play failed:", err);
         console.log("Video error state:", video.error);
       }
 
-      const basicMaterial = new THREE.MeshBasicMaterial({ map: videoTexture });
-      if (glass2 && glass2.material) {
-        glass2.material = basicMaterial;
-        glass2.material.needsUpdate = true;
-      }
+      // Removed unused basicMaterial definition
+      // glass2 material is no longer overridden
       if (glass2Glass1_0) {
-        glass2Glass1_0.visible = false;
-        glass2Glass1_0.material.needsUpdate = true;
+        // glass2Glass1_0 left untouched
       }
     },
   };
@@ -303,6 +309,7 @@ function setupModelControls() {
 }
 
 function createVideoPlaneOverlay() {
+  console.log("⚙️ createVideoPlaneOverlay called");
   if (!videoTexture || !model) return;
 
   const glass2 = model.getObjectByName("Glass2");
@@ -325,15 +332,17 @@ function createVideoPlaneOverlay() {
     map: videoTexture,
     side: THREE.DoubleSide,
   });
-  const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
-
+  console.log("✅ Video plane created");
+  videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
+  videoPlane.visible = false;
   videoPlane.position
     .copy(localPosition)
-    .add(new THREE.Vector3(0.05, 0.05, 0.05)); // tiny Y adjustment // nudged slightly up
+    .add(new THREE.Vector3(-0.5, 0.06, 0.05));
   videoPlane.quaternion.copy(screenWorldQuaternion);
-  videoPlane.scale.set(0.3, 0.3, 1); // scaled slightly larger to better fill screen // scaled to fit screen properly
+  videoPlane.scale.set(0.29, 0.29, 0.29);
   videoPlane.rotateY(Math.PI);
   videoPlane.rotation.x += 0.6;
-  videoPlane.rotation.z += 3.14; // tilt sideways
+  videoPlane.rotation.z += 3.14;
   parent.add(videoPlane);
+  // videoPlane is now managed globally in scope
 }
