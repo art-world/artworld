@@ -1,43 +1,64 @@
 @font-face {
-    font-family: 'G7Segment';
-    src: url('assets/fonts/G7_Segment_7a.ttf') format('truetype');
+  font-family: "Satoshi";
+  src: url("assets/fonts/Satoshi-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
 }
 
 body {
-    margin: 0;
-    overflow: hidden;
-    font-family: 'G7Segment', sans-serif;
+  margin: 0;
+  overflow: hidden;
+  font-family: "Satoshi", sans-serif;
+  font-weight: 100;
+  font-style: normal;
 }
 
 #loadingScreen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 2em;
-    z-index: 9999;
-    font-family: 'G7Segment', sans-serif;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: "Satoshi", sans-serif;
+  font-weight: 100;
+  font-size: 2em;
+  z-index: 9999;
+}
+
+/* Apply same chrome style + size + weight to both texts */
+#loadingScreen > div,
+#loadingPercentage {
+  font-weight: 100;
+  font-size: 1.5em;
+  background: linear-gradient(
+    120deg,
+    #ffffff 0%,
+    #bbbbbb 20%,
+    #d1d1d1 40%,
+    #f0f0f0 50%,
+    #aaaaaa 60%,
+    #ffffff 80%,
+    #c0c0c0 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  text-align: center;
+  max-width: 80%;
+  margin: 0.2em 0;
 }
 
 #container {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-#loadingPercentage {
-    margin-top: 20px; /* Adjusts space between the text and percentage */
-    color: white;
-    font-size: 1.5em;
-    text-align: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
