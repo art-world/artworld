@@ -322,7 +322,7 @@ function createVideoPlaneOverlay() {
   videoPlane.visible = false;
   videoPlane.position.copy(localPosition).add(new THREE.Vector3(-0.5, 0.06, 0.05));
   videoPlane.quaternion.copy(screenWorldQuaternion);
-  videoPlane.scale.set(0.29, 0.29, 0.29);
+  videoPlane.scale.set(-0.29, 0.29, 0.29);
   videoPlane.rotateY(Math.PI);
   videoPlane.rotation.x += 0.6;
 
