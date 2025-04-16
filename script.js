@@ -1,4 +1,3 @@
-// Updated Walkman interactive scene with full setup from repository and bug fixes
 import * as THREE from "three";
 import { OrbitControls } from "three/OrbitControls";
 import { GLTFLoader } from "three/GLTFLoader";
@@ -66,7 +65,8 @@ function init() {
     0.1,
     10000
   );
-  camera.position.set(0, 50, 20);
+  camera.position.set(0, 20, 50);
+  camera.up.set(0, 1, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: false });
   renderer.setClearColor(0x000000);
@@ -140,7 +140,7 @@ function init() {
     });
 
     setupModelControls();
-    if (videoTexture) createVideoPlaneOverlay(); // now only runs when both model and video are ready
+    if (videoTexture) createVideoPlaneOverlay();
   });
 
   window.addEventListener("resize", onWindowResize, false);
@@ -177,7 +177,6 @@ function createVideoTexture() {
     video.src = hlsUrl;
     video.load();
     setupVideoTexture();
-    // createVideoPlaneOverlay() will be triggered from model loader if videoTexture is ready
   } else if (Hls.isSupported()) {
     const hls = new Hls();
     hls.loadSource(hlsUrl);
@@ -197,8 +196,9 @@ function createVideoTexture() {
     videoTexture.magFilter = THREE.LinearFilter;
     videoTexture.format = THREE.RGBFormat;
     videoTexture.encoding = THREE.sRGBEncoding;
-    videoTexture.repeat.set(1, 1); // full coverage, no cropping
-    videoTexture.offset.set(0, 0); // centered texture
+    videoTexture.repeat.set(1, 1);
+    videoTexture.offset.set(0, 0);
+    videoTexture.flipY = false;
   }
 }
 
@@ -209,7 +209,9 @@ function onUserInteractionStart() {
 
 function onUserInteractionEnd() {
   userInteracting = false;
-  controls.autoRotate = true;
+  if (video && video.paused) {
+    controls.autoRotate = true;
+  }
 }
 
 function onWindowResize() {
@@ -217,6 +219,45 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
 }
+
+function focusOnVideoPlane() {
+  if (!model) return;
+
+  const glass = model.getObjectByName("Glass2");
+  if (!glass) {
+    console.warn("Glass2 not found for focus");
+    return;
+  }
+
+  const targetPosition = new THREE.Vector3();
+  glass.getWorldPosition(targetPosition);
+  targetPosition.y -= 5; // 👈 Slightly lower the zoom point
+
+  const normal = new THREE.Vector3(0, 0.9999, 1);
+  normal.applyQuaternion(glass.quaternion);
+  normal.normalize();
+
+  const newCameraPos = targetPosition.clone().add(normal.multiplyScalar(16));
+
+  const duration = 1000;
+  const startPos = camera.position.clone();
+  const startTarget = controls.target.clone();
+  const startTime = performance.now();
+
+  function animateFocus() {
+    const elapsed = performance.now() - startTime;
+    const t = Math.min(elapsed / duration, 1);
+    camera.position.lerpVectors(startPos, newCameraPos, t);
+    controls.target.lerpVectors(startTarget, targetPosition, t);
+    camera.up.set(0, 1, 0);
+    controls.update();
+    if (t < 1) requestAnimationFrame(animateFocus);
+  }
+
+  animateFocus();
+}
+
+// No changes made to setupModelControls or createVideoPlaneOverlay since plane placement was confirmed to be correct
 
 function setupModelControls() {
   if (!model) return;
@@ -247,6 +288,9 @@ function setupModelControls() {
         video.muted = false;
         video.volume = 1;
         console.log("Video started");
+
+        focusOnVideoPlane();
+
         const waitForPlane = setInterval(() => {
           if (videoPlane) {
             console.log("👁️ Setting videoPlane.visible = true");
@@ -257,12 +301,6 @@ function setupModelControls() {
       } catch (err) {
         console.error("Video play failed:", err);
         console.log("Video error state:", video.error);
-      }
-
-      // Removed unused basicMaterial definition
-      // glass2 material is no longer overridden
-      if (glass2Glass1_0) {
-        // glass2Glass1_0 left untouched
       }
     },
   };
@@ -327,7 +365,7 @@ function createVideoPlaneOverlay() {
   const localPosition = new THREE.Vector3();
   parent.worldToLocal(localPosition.copy(screenWorldPosition));
 
-  const videoGeometry = new THREE.PlaneGeometry(16, 9); // standard 16:9 aspect ratio
+  const videoGeometry = new THREE.PlaneGeometry(16, 9);
   const videoMaterial = new THREE.MeshBasicMaterial({
     map: videoTexture,
     side: THREE.DoubleSide,
@@ -342,7 +380,6 @@ function createVideoPlaneOverlay() {
   videoPlane.scale.set(0.29, 0.29, 0.29);
   videoPlane.rotateY(Math.PI);
   videoPlane.rotation.x += 0.6;
-  videoPlane.rotation.z += 3.14;
+
   parent.add(videoPlane);
-  // videoPlane is now managed globally in scope
 }
