@@ -17,8 +17,10 @@ loadingScreen.appendChild(loadingPercentage);
 
 let video;
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+const nowPlayingContainer = document.getElementById("nowPlayingContainer");
+const progressBar = document.getElementById("progressBar");
 
-const MIN_DISPLAY_TIME = 5000; // minimum time in ms
+const MIN_DISPLAY_TIME = 5000;
 const loadingStartTime = Date.now();
 
 const manager = new THREE.LoadingManager();
@@ -27,7 +29,6 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
   loadingPercentage.innerText = `${progress}%`;
 };
 manager.onLoad = function () {
-  console.log("All assets loaded.");
   const elapsed = Date.now() - loadingStartTime;
   const remaining = Math.max(MIN_DISPLAY_TIME - elapsed, 0);
   setTimeout(() => {
@@ -43,35 +44,21 @@ window.animate = animate;
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
+  updateNowPlayingProgress();
   renderer.render(scene, camera);
 }
 
 function init() {
-  console.log("Initializing scene...");
-
-  document.body.addEventListener(
-    "touchstart",
-    () => {
-      if (THREE.AudioContext.getContext().state === "suspended") {
-        THREE.AudioContext.getContext()
-          .resume()
-          .then(() => {
-            console.log("Audio context resumed");
-          });
-      }
-    },
-    { once: true }
-  );
+  document.body.addEventListener("touchstart", () => {
+    if (THREE.AudioContext.getContext().state === "suspended") {
+      THREE.AudioContext.getContext().resume();
+    }
+  }, { once: true });
 
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
-  camera = new THREE.PerspectiveCamera(
-    75,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    10000
-  );
+  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 10000);
   camera.position.set(0, 60, 50);
   camera.up.set(0, 1, 0);
 
@@ -99,14 +86,12 @@ function init() {
 
   const pmremGenerator = new THREE.PMREMGenerator(renderer);
   pmremGenerator.compileEquirectangularShader();
-  new RGBELoader()
-    .setDataType(THREE.HalfFloatType)
-    .load("assets/little_paris_under_tower_1k.hdr", function (texture) {
-      const envMap = pmremGenerator.fromEquirectangular(texture).texture;
-      scene.environment = envMap;
-      texture.dispose();
-      pmremGenerator.dispose();
-    });
+  new RGBELoader().setDataType(THREE.HalfFloatType).load("assets/little_paris_under_tower_1k.hdr", function (texture) {
+    const envMap = pmremGenerator.fromEquirectangular(texture).texture;
+    scene.environment = envMap;
+    texture.dispose();
+    pmremGenerator.dispose();
+  });
 
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
@@ -116,16 +101,8 @@ function init() {
   controls.autoRotate = true;
   controls.autoRotateSpeed = 1.0;
 
-  renderer.domElement.addEventListener(
-    "mousedown",
-    onUserInteractionStart,
-    false
-  );
-  renderer.domElement.addEventListener(
-    "mousemove",
-    onUserInteractionStart,
-    false
-  );
+  renderer.domElement.addEventListener("mousedown", onUserInteractionStart, false);
+  renderer.domElement.addEventListener("mousemove", onUserInteractionStart, false);
   renderer.domElement.addEventListener("mouseup", onUserInteractionEnd, false);
   renderer.domElement.addEventListener("wheel", onUserInteractionStart, false);
 
@@ -151,22 +128,13 @@ function init() {
   });
 
   window.addEventListener("resize", onWindowResize, false);
-
   createVideoTexture();
   animate();
 }
 
 function setupTouchEvents() {
-  renderer.domElement.addEventListener(
-    "touchstart",
-    onUserInteractionStart,
-    false
-  );
-  renderer.domElement.addEventListener(
-    "touchmove",
-    onUserInteractionStart,
-    false
-  );
+  renderer.domElement.addEventListener("touchstart", onUserInteractionStart, false);
+  renderer.domElement.addEventListener("touchmove", onUserInteractionStart, false);
   renderer.domElement.addEventListener("touchend", onUserInteractionEnd, false);
 }
 
@@ -177,8 +145,7 @@ function createVideoTexture() {
   video.crossOrigin = "anonymous";
   video.loop = true;
 
-  const hlsUrl =
-    "https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8";
+  const hlsUrl = "https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8";
 
   if (video.canPlayType("application/vnd.apple.mpegurl")) {
     video.src = hlsUrl;
@@ -197,7 +164,6 @@ function createVideoTexture() {
   }
 
   function setupVideoTexture() {
-    console.log("✅ Video texture created");
     videoTexture = new THREE.VideoTexture(video);
     videoTexture.minFilter = THREE.LinearFilter;
     videoTexture.magFilter = THREE.LinearFilter;
@@ -229,12 +195,8 @@ function onWindowResize() {
 
 function focusOnVideoPlane() {
   if (!model) return;
-
   const glass = model.getObjectByName("Glass2");
-  if (!glass) {
-    console.warn("Glass2 not found for focus");
-    return;
-  }
+  if (!glass) return;
 
   const targetPosition = new THREE.Vector3();
   glass.getWorldPosition(targetPosition);
@@ -266,7 +228,6 @@ function focusOnVideoPlane() {
 
 function setupModelControls() {
   if (!model) return;
-
   const playButton = model.getObjectByName("PlayButton");
   const pauseButton = model.getObjectByName("PauseButton");
   const forwardButton = model.getObjectByName("ForwardButton");
@@ -274,59 +235,44 @@ function setupModelControls() {
   const glass2 = model.getObjectByName("Glass2");
   const glass2Glass1_0 = model.getObjectByName("Glass2_Glass1_0");
 
-  if (
-    !playButton ||
-    !pauseButton ||
-    !forwardButton ||
-    !backwardButton ||
-    !glass2 ||
-    !glass2Glass1_0
-  )
-    return;
+  if (!playButton || !pauseButton || !forwardButton || !backwardButton || !glass2 || !glass2Glass1_0) return;
 
   playButton.userData = {
     action: async () => {
       controls.autoRotate = false;
-      console.log("Play button pressed.");
       try {
         await video.play();
         video.muted = false;
         video.volume = 1;
-        console.log("Video started");
-
+        nowPlayingContainer.style.display = "block";
         focusOnVideoPlane();
 
         const waitForPlane = setInterval(() => {
           if (videoPlane) {
-            console.log("👁️ Setting videoPlane.visible = true");
             videoPlane.visible = true;
             clearInterval(waitForPlane);
           }
         }, 100);
       } catch (err) {
         console.error("Video play failed:", err);
-        console.log("Video error state:", video.error);
       }
     },
   };
 
   pauseButton.userData = {
     action: () => {
-      console.log("Pause button pressed.");
       if (video) video.pause();
     },
   };
 
   forwardButton.userData = {
     action: () => {
-      console.log("Forward button pressed.");
       video.currentTime = Math.min(video.duration, video.currentTime + 10);
     },
   };
 
   backwardButton.userData = {
     action: () => {
-      console.log("Backward button pressed.");
       video.currentTime = Math.max(0, video.currentTime - 10);
     },
   };
@@ -352,14 +298,10 @@ function setupModelControls() {
 }
 
 function createVideoPlaneOverlay() {
-  console.log("⚙️ createVideoPlaneOverlay called");
   if (!videoTexture || !model) return;
 
   const glass2 = model.getObjectByName("Glass2");
-  if (!glass2) {
-    console.warn("Glass2 not found");
-    return;
-  }
+  if (!glass2) return;
 
   const screenWorldPosition = new THREE.Vector3();
   const screenWorldQuaternion = new THREE.Quaternion();
@@ -375,16 +317,20 @@ function createVideoPlaneOverlay() {
     map: videoTexture,
     side: THREE.DoubleSide,
   });
-  console.log("✅ Video plane created");
+
   videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
   videoPlane.visible = false;
-  videoPlane.position
-    .copy(localPosition)
-    .add(new THREE.Vector3(-0.5, 0.06, 0.05));
+  videoPlane.position.copy(localPosition).add(new THREE.Vector3(-0.5, 0.06, 0.05));
   videoPlane.quaternion.copy(screenWorldQuaternion);
   videoPlane.scale.set(0.29, 0.29, 0.29);
   videoPlane.rotateY(Math.PI);
   videoPlane.rotation.x += 0.6;
 
   parent.add(videoPlane);
+}
+
+function updateNowPlayingProgress() {
+  if (!video || video.paused || video.ended || !video.duration) return;
+  const percent = (video.currentTime / video.duration) * 100;
+  progressBar.style.width = `${percent}%`;
 }
