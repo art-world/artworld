@@ -65,7 +65,7 @@ function init() {
     0.1,
     10000
   );
-  camera.position.set(0, 20, 50);
+  camera.position.set(0, 60, 50);
   camera.up.set(0, 1, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: false });
@@ -231,13 +231,13 @@ function focusOnVideoPlane() {
 
   const targetPosition = new THREE.Vector3();
   glass.getWorldPosition(targetPosition);
-  targetPosition.y -= 5; // 👈 Slightly lower the zoom point
+  targetPosition.y -= 7.5; // 👈 Slightly lower the zoom point
 
   const normal = new THREE.Vector3(0, 0.9999, 1);
   normal.applyQuaternion(glass.quaternion);
   normal.normalize();
 
-  const newCameraPos = targetPosition.clone().add(normal.multiplyScalar(16));
+  const newCameraPos = targetPosition.clone().add(normal.multiplyScalar(19));
 
   const duration = 1000;
   const startPos = camera.position.clone();
