@@ -1,7 +1,7 @@
 @font-face {
   font-family: "Satoshi";
   src: url("assets/fonts/Satoshi-Variable.ttf") format("truetype");
-  font-weight: 100 900;
+  font-weight: 80 900;
   font-style: normal;
 }
 
@@ -9,7 +9,7 @@ body {
   margin: 0;
   overflow: hidden;
   font-family: "Satoshi", sans-serif;
-  font-weight: 100;
+  font-weight: 80;
   font-style: normal;
 }
 
@@ -25,16 +25,16 @@ body {
   align-items: center;
   justify-content: center;
   font-family: "Satoshi", sans-serif;
-  font-weight: 100;
-  font-size: 2em;
+  font-weight: 800;
+  font-size: 1.5em;
   z-index: 9999;
 }
 
 /* Apply same chrome style + size + weight to both texts */
 #loadingScreen > div,
 #loadingPercentage {
-  font-weight: 100;
-  font-size: 1.5em;
+  font-weight: 800;
+  font-size: 1em;
   background: linear-gradient(
     120deg,
     #ffffff 0%,
