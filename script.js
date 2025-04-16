@@ -8,15 +8,18 @@ let userInteracting = false;
 const container = document.getElementById("container");
 const loadingScreen = document.getElementById("loadingScreen");
 const loadingText = document.createElement("div");
-loadingText.innerText = "Use the walkman buttons to play audio...";
+loadingText.innerText = "Zoom in on the Walkman and hit the 'Play' button...";
 loadingText.style.textAlign = "center";
 loadingScreen.appendChild(loadingText);
 const loadingPercentage = document.createElement("div");
+loadingPercentage.id = "loadingPercentage";
 loadingScreen.appendChild(loadingPercentage);
 
 let video;
-
 const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+const MIN_DISPLAY_TIME = 5000; // minimum time in ms
+const loadingStartTime = Date.now();
 
 const manager = new THREE.LoadingManager();
 manager.onProgress = function (url, itemsLoaded, itemsTotal) {
@@ -25,8 +28,12 @@ manager.onProgress = function (url, itemsLoaded, itemsTotal) {
 };
 manager.onLoad = function () {
   console.log("All assets loaded.");
-  loadingScreen.style.display = "none";
-  container.style.display = "block";
+  const elapsed = Date.now() - loadingStartTime;
+  const remaining = Math.max(MIN_DISPLAY_TIME - elapsed, 0);
+  setTimeout(() => {
+    loadingScreen.style.display = "none";
+    container.style.display = "block";
+  }, remaining);
 };
 
 init();
@@ -231,7 +238,7 @@ function focusOnVideoPlane() {
 
   const targetPosition = new THREE.Vector3();
   glass.getWorldPosition(targetPosition);
-  targetPosition.y -= 7.5; // 👈 Slightly lower the zoom point
+  targetPosition.y -= 7.5;
 
   const normal = new THREE.Vector3(0, 0.9999, 1);
   normal.applyQuaternion(glass.quaternion);
@@ -256,8 +263,6 @@ function focusOnVideoPlane() {
 
   animateFocus();
 }
-
-// No changes made to setupModelControls or createVideoPlaneOverlay since plane placement was confirmed to be correct
 
 function setupModelControls() {
   if (!model) return;
