@@ -145,7 +145,7 @@ function createVideoTexture() {
   video.crossOrigin = "anonymous";
   video.loop = true;
 
-  const hlsUrl = "https://videodelivery.net/5f2131064379f44031902d4a4b9a6562/manifest/video.m3u8";
+  const hlsUrl = "https://customer-2qqx87orhla11tfu.cloudflarestream.com/45d54a2b3ec8f752c672d8f727ca8a0a/watch";
 
   if (video.canPlayType("application/vnd.apple.mpegurl")) {
     video.src = hlsUrl;
