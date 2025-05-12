@@ -1,7 +1,7 @@
 @font-face {
   font-family: "Satoshi";
   src: url("assets/fonts/Satoshi-Variable.ttf") format("truetype");
-  font-weight: 700 700;
+  font-weight: 100 99999;
   font-style: normal;
 }
 
@@ -26,15 +26,15 @@ body {
   justify-content: center;
   font-family: "Satoshi", sans-serif;
   font-weight: 100;
-  font-size: 1em;
+  font-size: 2em;
   z-index: 9999;
 }
 
 /* Apply same chrome style + size + weight to both texts */
 #loadingScreen > div,
 #loadingPercentage {
-  font-weight: 80;
-  font-size: 1em;
+  font-weight: 100;
+  font-size: 2em;
   background: linear-gradient(
     120deg,
     #ffffff 0%,
