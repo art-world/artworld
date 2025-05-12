@@ -63,7 +63,7 @@ function init() {
   camera.up.set(0, 1, 0);
 
   renderer = new THREE.WebGLRenderer({ antialias: false });
-  renderer.setClearColor(0x000000);
+  renderer.setClearColor(0xffffff);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.toneMappingExposure = 1.5;
