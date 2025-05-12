@@ -26,7 +26,7 @@ body {
   justify-content: center;
   font-family: "Satoshi", sans-serif;
   font-weight: 100;
-  font-size: 2em;
+  font-size: 1.5em;
   z-index: 9999;
 }
 
@@ -34,7 +34,7 @@ body {
 #loadingScreen > div,
 #loadingPercentage {
   font-weight: 100;
-  font-size: 2em;
+  font-size: 1.5em;
   background: linear-gradient(
     120deg,
     #ffffff 0%,
