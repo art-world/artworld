@@ -202,7 +202,7 @@ function focusOnVideoPlane() {
   glass.getWorldPosition(targetPosition);
   targetPosition.y -= 7.5;
 
-  const normal = new THREE.Vector3(0, 0.9999, 1);
+  const normal = new THREE.Vector3(0, 1, 1);
   normal.applyQuaternion(glass.quaternion);
   normal.normalize();
 
